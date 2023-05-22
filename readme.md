@@ -4,7 +4,8 @@
 `pip3 intall PyQt5`
 `pip3 install pymysql`
 
-# 确定安装mysql，并将*/mysql8/bin加入环境变量。启动mysql `mysql -uroot -pustc` ustc是密码.启动一次就可以 `quit`退出。
+# mysql
+确定安装mysql，并将*/mysql8/bin加入环境变量。启动mysql `mysql -uroot -pustc` ustc是密码.启动一次就可以 `quit`退出。
 # 修改database.py中的config
 ```python
 config = {
