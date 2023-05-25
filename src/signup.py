@@ -117,7 +117,6 @@ class Signup(QGroupBox):
             'REPASSWORD': self.repPasswordInput.text(),
             'SNAME': self.nameInput.text(),
             'EMAIL': self.emailInput.text(),
-            'PUNISHED': 0
         }
         return info
 

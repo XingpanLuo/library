@@ -1,9 +1,9 @@
 # 任务分配
 import random
 
-num1=1
-num2=2
-num3=3
+num1=1234
+num2=1958
+num3=2023
 seed = num1 + num2 + num3
 
 tasks = ["任务(1)", "任务(2)", "任务(3)"]
