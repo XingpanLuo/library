@@ -147,57 +147,69 @@ def init_database():
         USE library
         ''')
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS student(
-            SID char(15) PRIMARY KEY,
-            PASSWORD char(70),
-            SNAME text,
-            DEPARTMENT varchar(20),
-            MAJOR varchar(20),
-            MAX int
-            )''')
+        CREATE TABLE IF NOT EXISTS reader(
+            ID char(8) PRIMARY KEY,
+            name varchar(10),
+            email varchar(30),
+            pwd char(64),
+            headshot varchar(255)
+        );
+        ''')
+
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS  administrator(
-            AID char(15) PRIMARY KEY,
-            PASSWORD char(70)
-            )''')
+        CREATE TABLE IF NOT EXISTS master(
+            ID char(8) PRIMARY KEY,
+            name varchar(10),
+            email varchar(30),
+            pwd char(64),
+            headshot varchar(255)
+        );
+        ''')
+
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS  book(
-            BID char(15) PRIMARY KEY,
-            BNAME text,
-            AUTHOR text,
-            PUBLICATION_DATE char(17),
-            PRESS varchar(20),
-            POSITION char(10),
-            SUM int,
-            NUM int
-            )''')
+        CREATE TABLE IF NOT EXISTS book(
+            ID char(8) PRIMARY KEY,
+            name varchar(10),
+            author varchar(10),
+            price float,
+            status int,
+            borrow_Times int,
+            reserve_Times int
+        );
+        ''')
+
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS  borrowing_book(
-            BID char(15),
-            SID char(15),
-            BORROW_DATE char(17),
-            DEADLINE char(17),
-            PUNISH int,
-            PRIMARY KEY(BID, SID)
-            )''')
+        CREATE TABLE IF NOT EXISTS borrow(
+            book_ID char(8),
+            reader_ID char(8),
+            borrow_Date date,
+            return_Date date,
+            PRIMARY KEY(book_ID, reader_ID)
+        );
+        ''')
+
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS  log(
-            BID char(15),
-            SID char(15),
-            BORROW_DATE char(17),
-            BACK_DATE char(17),
-            PUNISHED int
-            )''')
+        CREATE TABLE IF NOT EXISTS reserve(
+            book_ID char(8),
+            reader_ID char(8),
+            reserve_Date date,
+            take_Date date,
+            PRIMARY KEY(book_ID, reader_ID)
+        );
+        ''')
+
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS  classification(
-            BID char(15),
-            CLASSIFICATION varchar(15),
-            PRIMARY KEY(BID, CLASSIFICATION)
-            )''')
+        CREATE TABLE IF NOT EXISTS violation(
+            reader_ID char(8),
+            book_ID char(8),
+            borrow_Date date,
+            PRIMARY KEY(reader_ID, book_ID, borrow_Date)
+        );
+        ''')
         cursor.execute('''
         INSERT
-        INTO administrator
-        VALUES('admin', '123456')
+        INTO master
+        VALUES('master', '123456')
             )''')
         conn.commit()
     except Exception as e:
