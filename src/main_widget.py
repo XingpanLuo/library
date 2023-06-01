@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from src import login
 from src import signup
 from src import database
-
+from src import master
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -35,7 +35,7 @@ class MainWindow(QWidget):
     def loginFunction(self):
         user_mes = {
             'ID': self.login.accountInput.text(),
-            'PASSWORD': database.encrypt(self.login.passwordInput.text())
+            'PWD': database.encrypt(self.login.passwordInput.text())
         }
         self.user = database.signin(user_mes)
         if self.user is not None:
@@ -62,11 +62,11 @@ class MainWindow(QWidget):
         #     self.errorBox(res['reason'])
         #     return
         # self.user['MAX'] = int(self.user['MAX'])
-        # self.user['PASSWORD'] = database.encrypt(self.user['PASSWORD'])
+        # self.user['PWD'] = database.encrypt(self.user['PWD'])
 
         # ans = database.signup(self.user)
         # self.user['class'] = 'stu'
-        # self.user.pop('PASSWORD')
+        # self.user.pop('PWD')
         # if ans:
         #     self.signup.setVisible(False)
         #     print('成功')
@@ -83,18 +83,18 @@ class MainWindow(QWidget):
         self.login.setVisible(True)
 
     def display(self):
-        pass
         # 显示学生信息
-        # if self.user['class'] == 'stu':
-        #     self.body = student.StudentPage(self.user)
-        #     self.body.setParent(self)
-        #     self.body.setVisible(True)
-        #     self.body.out.clicked.connect(self.logout)
-        # else:
-        #     self.body = administrator.AdministratorPage(self.user)
-        #     self.body.setParent(self)
-        #     self.body.setVisible(True)
-        #     self.body.out.clicked.connect(self.logout)
+        if self.user['class'] == 'stu':
+            pass 
+            # self.body = student.StudentPage(self.user)
+            # self.body.setParent(self)
+            # self.body.setVisible(True)
+            # self.body.out.clicked.connect(self.logout)
+        else:
+            self.body = master.AdministratorPage(self.user)
+            self.body.setParent(self)
+            self.body.setVisible(True)
+            self.body.out.clicked.connect(self.logout)
 
     def errorBox(self, mes: str):
         msgBox = QMessageBox(

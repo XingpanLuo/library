@@ -15,8 +15,8 @@ def check_user_info(info: dict) -> dict:
     '''
     info = {
             'SID': self.accountInput.text(),
-            'PASSWORD': self.passwordInput.text(),
-            'REPASSWORD': self.repPasswordInput.text(),
+            'PWD': self.passwordInput.text(),
+            'REPWD': self.repPasswordInput.text(),
             'SNAME': self.nameInput.text(),
             'DEPARTMENT': self.deptInput.text(),
             'MAJOR': self.majorInput.text(),
@@ -38,7 +38,7 @@ def check_user_info(info: dict) -> dict:
     if not info['SID'].isalnum():
         ans['reason'] = 'ID存在非法字符'
         return ans
-    if info['PASSWORD'] != info['REPASSWORD']:
+    if info['PWD'] != info['REPWD']:
         ans['reason'] = '两次输入密码不一致'
         return ans
     if not info['MAX'].isdigit():
@@ -89,17 +89,16 @@ def convert(val: list):
     # 如果是学生
     if len(val) == 5:
         ans = {
-            'class': 'stu',
-            'SID': remove_blank(val[0]),
-            'SNAME': remove_blank(val[1]),
-            'DEPARTMENT': remove_blank(val[2]),
-            'MAJOR': remove_blank(val[3]),
-            'MAX': int(val[4])
+            'class': 'reader',
+            'ID': remove_blank(val[0]),
+            'name': remove_blank(val[1]),
+            'email': remove_blank(val[2]),
+            'headshot': remove_blank(val[3]),
         }
     else:
         ans = {
-            'class': 'admin',
-            'AID': remove_blank(val[0])
+            'class': 'master',
+            'ID': remove_blank(val[0])
         }
     return ans
 
@@ -141,6 +140,7 @@ def init_database():
         conn = pymysql.connect(host=CONFIG['host'], user=CONFIG['user'], passwd=CONFIG['pwd'],port=CONFIG['port'])
         cursor = conn.cursor()
         conn.autocommit(True)
+        cursor.execute('''DROP DATABASE library''')
         cursor.execute('''CREATE DATABASE IF NOT EXISTS library''')
         conn.autocommit(False)
         cursor.execute('''
@@ -160,9 +160,7 @@ def init_database():
         CREATE TABLE IF NOT EXISTS master(
             ID char(8) PRIMARY KEY,
             name varchar(10),
-            email varchar(30),
-            pwd char(64),
-            headshot varchar(255)
+            pwd char(64)
         );
         ''')
 
@@ -208,9 +206,20 @@ def init_database():
         ''')
         cursor.execute('''
         INSERT
-        INTO master
-        VALUES('master', '123456')
-            )''')
+        INTO master (ID,name,pwd) 
+        VALUES('master', 'master','123456');
+        ''')
+# book: ID:char(8),name:varchar(10),author:varchar(10),price:float,status:int,borrow_Times:int,reserve_Times:int  
+        cursor.execute('''
+        INSERT 
+        INTO book(ID, name, author, price, status, borrow_Times) 
+        VALUES('b1', '数据库系统实现', 'Ullman', 59.0, 0, 4);
+        ''')
+        cursor.execute('''
+        INSERT 
+        INTO reader(ID,name,email,headshot) 
+        VALUES('r1', '李林', 'a@qq.com', './headshot/r1.png');
+        ''')
         conn.commit()
     except Exception as e:
         # print('Init fall 如果数据库已经成功初始化则无视此条警告')
@@ -226,7 +235,7 @@ def signup(user_message: dict) -> bool:
     传入以下格式的字典
     user_message{
         'SID': str,
-        'PASSWORD': str,
+        'PWD': str,
         'SNAME': str,
         'DEPARTMENT': str,
         'MAJOR': str,
@@ -250,7 +259,7 @@ def signup(user_message: dict) -> bool:
         VALUES(%s, %s, %s, %s, %s, %s)
         ''', (
             user_message['SID'],
-            user_message['PASSWORD'],
+            user_message['PWD'],
             user_message['SNAME'],
             user_message['DEPARTMENT'],
             user_message['MAJOR'],
@@ -273,7 +282,7 @@ def signin(user_message: dict) -> dict:
     传入以下格式的字典
     user_message{
         'ID': str,
-        'PASSWORD': str
+        'PWD': str
     }
     如果管理员用户存在返回以下字典
     {
@@ -295,25 +304,24 @@ def signin(user_message: dict) -> dict:
     try:
         conn = pymysql.connect(host=CONFIG['host'], user=CONFIG['user'], passwd=CONFIG['pwd'], port=CONFIG['port'],db=CONFIG['db'])
         cursor = conn.cursor()
-        # 现在administrator表内匹配
         cursor.execute('''
-        SELECT AID
-        FROM administrator
-        WHERE AID=%s AND PASSWORD=%s
+        SELECT ID
+        FROM master
+        WHERE ID=%s AND pwd=%s
         ''', (
             user_message['ID'],
-            user_message['PASSWORD']
+            user_message['PWD']
         ))
         temp = cursor.fetchall()
         # 管理员表内没有找到则在student表内匹配
         if len(temp) == 0:
             cursor.execute('''
-            SELECT SID, SNAME, DEPARTMENT, MAJOR, MAX
+            SELECT ID, name,email,pwd,headshot
             FROM student
-            WHERE SID=%s AND PASSWORD=%s
+            WHERE ID=%s AND pwd=%s
             ''', (
                 user_message['ID'],
-                user_message['PASSWORD']
+                user_message['PWD']
             ))
             temp = cursor.fetchall()
         ans = temp
@@ -333,7 +341,7 @@ def update_student(user_message: dict) -> bool:
     传入字典格式如下
     user_message{
         'SID': str,
-        'PASSWORD': str,
+        'PWD': str,
         'SNAME': str,
         'DEPARTMENT': str,
         'MAJOR': str,
@@ -356,13 +364,13 @@ def update_student(user_message: dict) -> bool:
                 user_message['MAX'],
                 user_message['SID']
             ))
-        if 'PASSWORD' in user_message:
+        if 'PWD' in user_message:
             cursor.execute('''
             UPDATE student
-            SET PASSWORD=%s
+            SET PWD=%s
             WHERE SID=%s
             ''', (
-                user_message['PASSWORD'],
+                user_message['PWD'],
                 user_message['SID']
             ))
         conn.commit()
@@ -408,7 +416,7 @@ def get_student_info(SID: str) -> dict:
 
 
 # 查找学生
-def search_student(info: str) -> list:
+def search_reader(info: str) -> list:
     '''
     传入SID或学生姓名进行查找
     返回[[SID, SNAME, DEPARTMENT, MAJOR, MAX],...]
@@ -422,17 +430,17 @@ def search_student(info: str) -> list:
         # 显示所有书信息
         if info == 'ID/姓名' or info == '':
             cursor.execute('''
-            SELECT SID, SNAME, DEPARTMENT, MAJOR, MAX
-            FROM student
+            SELECT ID, name, email
+            FROM reader
             ''')
             res += cursor.fetchall()
         else:
             # 按条件查找
             for i in val:
                 cursor.execute('''
-                SELECT SID, SNAME, DEPARTMENT, MAJOR, MAX
-                FROM student
-                WHERE SID=%s OR SNAME LIKE %s
+                SELECT ID, name, email
+                FROM reader
+                WHERE ID=%s OR name LIKE %s
                 ''', i)
                 res += cursor.fetchall()
         res = list(set(res))
@@ -734,12 +742,9 @@ def get_book_info(BID: str) -> dict:
         'BID': str,
         'BNAME': str,
         'AUTHOR': str,
-        'PUBLICATION_DATE': str,
-        'PRESS': str,
-        'POSITION': str,
-        'SUM': int,
-        'NUM': int,
-        'CLASSIFICATION': str
+        'PRICE': str,
+        'STATUS':str,
+        'BORROW_TIMES': str
     }
     '''
     try:
@@ -755,19 +760,19 @@ def get_book_info(BID: str) -> dict:
         if len(res) == 0:
             raise Exception('查无此书')
 
-        # 获取分类
-        cursor.execute('''
-        SELECT CLASSIFICATION
-        FROM classification
-        WHERE BID=%s
-        ''', (BID))
-        CLASSIFICATION = ''
-        for i in cursor.fetchall():
-            CLASSIFICATION += (remove_blank(i[0]) + ' ')
+        # # 获取分类
+        # cursor.execute('''
+        # SELECT CLASSIFICATION
+        # FROM classification
+        # WHERE BID=%s
+        # ''', (BID))
+        # CLASSIFICATION = ''
+        # for i in cursor.fetchall():
+        #     CLASSIFICATION += (remove_blank(i[0]) + ' ')
         # 把列表转换为字典
         res = list(res[0])
-        res.append(CLASSIFICATION)
-        key_list = ['BID', 'BNAME', 'AUTHOR', 'PUBLICATION_DATE', 'PRESS', 'POSITION', 'SUM', 'NUM', 'CLASSIFICATION']
+        # res.append(CLASSIFICATION)
+        key_list = ['BID', 'BNAME', 'AUTHOR', 'PRICE', 'STATUS', 'BORROW_TIMES']
         ans = {}
         for i, key in zip(res, key_list):
             ans[key] = i
@@ -900,10 +905,10 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
         if info == 'ID/书名/作者/出版社' or info == '':
             cursor.execute('''
             SELECT *
-            FROM book
+            FROM book;
             ''')
             res = tuple_to_list(cursor.fetchall())
-        elif restrict != 'BID' and restrict != 'CLASSIFICATION':
+        elif restrict != 'BID':
             # AUTHOR或PRESS或BNAME
             cursor.execute(f'''
             SELECT *
@@ -916,36 +921,10 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
             cursor.execute('''
             SELECT *
             FROM book
-            WHERE BID = %s
+            WHERE ID = %s;
             ''', (info))
             res = tuple_to_list(cursor.fetchall())
-        elif restrict == 'CLASSIFICATION':
-            # 通过分类搜书
-            cursor.execute('''
-            SELECT BID
-            FROM classification
-            WHERE CLASSIFICATION = %s
-            ''', (info))
-            for BID in cursor.fetchall():
-                cursor.execute('''
-                SELECT *
-                FROM book
-                WHERE BID = %s
-                ''', (BID[0]))
-                res.append(tuple_to_list(cursor.fetchall())[0])
-        # 把分类搜出来
-        for book_info in res:
-            CLASSIFICATIONS = ''
-            BID = book_info[0]
-            cursor.execute('''
-            SELECT CLASSIFICATION
-            FROM classification
-            WHERE BID = %s
-            ''', (BID))
-            for classification in cursor.fetchall():
-                CLASSIFICATIONS += (remove_blank(classification[0]) + ' ')
-            book_info.append(CLASSIFICATIONS)
-
+            
         # 匹配学生信息判断每一本书是否可借
         if SID != '':
             # 获得学生最大借书数
@@ -1052,7 +1031,7 @@ def encrypt(val):
 if __name__ == '__main__':
     temp = {
         'SID': '201603',
-        'PASSWORD': 'ustc',
+        'PWD': 'ustc',
         'SNAME': '小王',
         'DEPARTMENT': '数学与信息科学学院',
         'MAJOR': 'SE',
@@ -1062,14 +1041,14 @@ if __name__ == '__main__':
     user_message = {
         'SID': '1',
         'SNAME': '1',
-        'PASSWORD': '123456',
+        'PWD': '123456',
         'DEPARTMENT': '1',
         'MAJOR': '2',
         'MAX': 5
     }
     temp_login = {
         'ID': '1',
-        'PASSWORD': 'ustc'
+        'PWD': 'ustc'
     }
     book_msg = {
                 'BID': '444',
@@ -1117,7 +1096,7 @@ if __name__ == '__main__':
     # print(delete_book('3'))
 
     # 查找学生
-    # print(search_student('a 1'))
+    # print(search_reader('a 1'))
 
     # 获取学生信息
     # print(get_student_info('1'))
