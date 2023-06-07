@@ -1,9 +1,11 @@
 import sys
-from src import database
-from PyQt5.QtWidgets import (QApplication, QVBoxLayout, QLabel, QLineEdit, QToolButton, QGroupBox)
+# from src import database
+from PyQt5.QtWidgets import (QApplication, QVBoxLayout, QLabel, QLineEdit,
+                             QToolButton, QGroupBox)
 
 
 class Signup(QGroupBox):
+
     def __init__(self):
         super().__init__()
 
@@ -12,8 +14,8 @@ class Signup(QGroupBox):
 
         account = QLabel()
         account.setText('学号')
-        
-        email=QLabel()
+
+        email = QLabel()
         email.setText('邮箱')
 
         name = QLabel()
@@ -31,15 +33,17 @@ class Signup(QGroupBox):
         self.accountInput.setText('输入学号')
         self.accountInput.initText = '输入学号'
         self.accountInput.setTextMargins(5, 5, 5, 5)
-        self.accountInput.mousePressEvent = lambda x: self.inputClick(self.accountInput)
+        self.accountInput.mousePressEvent = lambda x: self.inputClick(
+            self.accountInput)
 
         # 邮箱输入框
-        self.emailInput=QLineEdit()
-        self.emailInput.setFixedSize(400,40)
+        self.emailInput = QLineEdit()
+        self.emailInput.setFixedSize(400, 40)
         self.emailInput.setText('输入邮箱')
-        self.emailInput.initText='输入邮箱'
-        self.emailInput.setTextMargins(5,5,5,5)
-        self.emailInput.mousePressEvent = lambda x: self.inputClick(self.emailInput)
+        self.emailInput.initText = '输入邮箱'
+        self.emailInput.setTextMargins(5, 5, 5, 5)
+        self.emailInput.mousePressEvent = lambda x: self.inputClick(self.
+                                                                    emailInput)
 
         # 姓名输入框
         self.nameInput = QLineEdit()
@@ -47,7 +51,8 @@ class Signup(QGroupBox):
         self.nameInput.setText('输入姓名')
         self.nameInput.initText = '输入姓名'
         self.nameInput.setTextMargins(5, 5, 5, 5)
-        self.nameInput.mousePressEvent = lambda x: self.inputClick(self.nameInput)
+        self.nameInput.mousePressEvent = lambda x: self.inputClick(self.
+                                                                   nameInput)
 
         # 密码
         self.passwordInput = QLineEdit()
@@ -55,7 +60,8 @@ class Signup(QGroupBox):
         self.passwordInput.setText('输入密码')
         self.passwordInput.initText = '输入密码'
         self.passwordInput.setTextMargins(5, 5, 5, 5)
-        self.passwordInput.mousePressEvent = lambda x: self.inputClick(self.passwordInput)
+        self.passwordInput.mousePressEvent = lambda x: self.inputClick(
+            self.passwordInput)
 
         # 重复密码
         self.repPasswordInput = QLineEdit()
@@ -63,7 +69,8 @@ class Signup(QGroupBox):
         self.repPasswordInput.setText('重复输入密码')
         self.repPasswordInput.initText = '重复输入密码'
         self.repPasswordInput.setTextMargins(5, 5, 5, 5)
-        self.repPasswordInput.mousePressEvent = lambda x: self.inputClick(self.repPasswordInput)
+        self.repPasswordInput.mousePressEvent = lambda x: self.inputClick(
+            self.repPasswordInput)
 
         # 注册
         self.submit = QToolButton()
@@ -119,6 +126,7 @@ class Signup(QGroupBox):
             'EMAIL': self.emailInput.text(),
         }
         return info
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

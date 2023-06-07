@@ -3,19 +3,21 @@ import time
 import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QGridLayout, QGroupBox,
                              QToolButton, QSplitter, QVBoxLayout, QHBoxLayout,
-                             QLabel, QTableWidget, QTableWidgetItem, QAbstractItemView,
-                             QLineEdit, QFileDialog, QMessageBox, QComboBox)
+                             QLabel, QTableWidget, QTableWidgetItem,
+                             QAbstractItemView, QLineEdit, QFileDialog,
+                             QMessageBox, QComboBox)
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, QSize
 from src import database
-# from src import student_information
+# from src import reader_information
 # from src import book_information
 # import database
-# import student_information
+# import reader_information
 # import book_information
 
 
 class AdministratorPage(QWidget):
+
     def __init__(self, info):
         super().__init__()
         self.info = info
@@ -84,7 +86,8 @@ class AdministratorPage(QWidget):
         self.userManage.setFixedSize(160, 50)
         self.userManage.setIcon(QIcon('icon/detial.png'))
         self.userManage.setIconSize(QSize(30, 30))
-        self.userManage.clicked.connect(lambda: self.switch(1, self.userManage))
+        self.userManage.clicked.connect(
+            lambda: self.switch(1, self.userManage))
         self.userManage.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
         # 借阅日志
@@ -102,11 +105,13 @@ class AdministratorPage(QWidget):
         self.borrowManage.setFixedSize(160, 50)
         self.borrowManage.setIcon(QIcon('icon/borrowing.png'))
         self.borrowManage.setIconSize(QSize(30, 30))
-        self.borrowManage.clicked.connect(lambda: self.switch(3, self.borrowManage))
+        self.borrowManage.clicked.connect(
+            lambda: self.switch(3, self.borrowManage))
         self.borrowManage.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
-        self.btnList = [self.bookManage,
-                        self.userManage, self.history, self.borrowManage]
+        self.btnList = [
+            self.bookManage, self.userManage, self.history, self.borrowManage
+        ]
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.bookManage)
@@ -214,6 +219,7 @@ class AdministratorPage(QWidget):
 
 
 class BookManage(QGroupBox):
+
     def __init__(self):
         super().__init__()
         self.book_list = []
@@ -233,7 +239,7 @@ class BookManage(QGroupBox):
     # 设置搜索框
     def setSearchBar(self):
         self.selectBox = QComboBox()
-        self.selectBox.addItems(['书号','作者', '书名'])
+        self.selectBox.addItems(['书号', '作者', '书名'])
         self.selectBox.setFixedHeight(30)
         self.searchTitle = QLabel()
         self.searchTitle.setText('搜索书籍')
@@ -263,8 +269,9 @@ class BookManage(QGroupBox):
 
     # 搜索方法
     def searchFunction(self):
-        convert = {'书号': 'BID','作者': 'AUTHOR', '书名': 'BNAME', '': 'BNAME'}
-        self.book_list = database.search_book(self.searchInput.text(), convert[self.selectBox.currentText()])
+        convert = {'书号': 'BID', '作者': 'AUTHOR', '书名': 'BNAME', '': 'BNAME'}
+        self.book_list = database.search_book(
+            self.searchInput.text(), convert[self.selectBox.currentText()])
         if self.book_list == []:
             print('未找到')
         if self.table is not None:
@@ -391,6 +398,7 @@ class BookManage(QGroupBox):
 
 
 class ReaderManage(QWidget):
+
     def __init__(self):
         super().__init__()
         self.book_list = []
@@ -494,12 +502,12 @@ class ReaderManage(QWidget):
         itemModify = QToolButton(self.table)
         itemModify.setFixedSize(85, 25)
         itemModify.setText('修改')
-        itemModify.clicked.connect(lambda: self.updateStudentFunction(val[0]))
+        itemModify.clicked.connect(lambda: self.updatereaderFunction(val[0]))
 
         itemDelete = QToolButton(self.table)
         itemDelete.setFixedSize(85, 25)
         itemDelete.setText('删除')
-        itemDelete.clicked.connect(lambda: self.deleteStudentFunction(val[0]))
+        itemDelete.clicked.connect(lambda: self.deletereaderFunction(val[0]))
 
         itemLayout = QHBoxLayout()
         itemLayout.setContentsMargins(0, 0, 0, 0)
@@ -514,26 +522,26 @@ class ReaderManage(QWidget):
         self.table.setItem(1, 2, itemEMAIL)
         self.table.setCellWidget(1, 3, itemWidget)
 
-    def updateStudentFunction(self, SID: str):
-        stu_info = database.get_student_info(SID)
+    def updatereaderFunction(self, SID: str):
+        stu_info = database.get_reader_info(SID)
         if stu_info is None:
             return
-        self.updateStudentDialog = student_information.StudentInfo(stu_info)
-        self.updateStudentDialog.after_close.connect(self.updateStudent)
-        self.updateStudentDialog.show()
+        self.updatereaderDialog = reader_information.readerInfo(stu_info)
+        self.updatereaderDialog.after_close.connect(self.updatereader)
+        self.updatereaderDialog.show()
 
-    def updateStudent(self, stu_info: dict):
-        ans = database.update_student(stu_info)
+    def updatereader(self, stu_info: dict):
+        ans = database.update_reader(stu_info)
         if ans:
             self.searchFunction()
 
-    def deleteStudentFunction(self, BID: str):
+    def deletereaderFunction(self, BID: str):
         msgBox = QMessageBox(QMessageBox.Warning, "警告!", '您将会永久删除此读者以及相关信息!',
                              QMessageBox.NoButton, self)
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.addButton("取消", QMessageBox.RejectRole)
         if msgBox.exec_() == QMessageBox.AcceptRole:
-            ans = database.delete_student(BID)
+            ans = database.delete_reader(BID)
             if ans:
                 self.searchFunction()
 
@@ -583,6 +591,7 @@ class ReaderManage(QWidget):
 
 
 class BorrowManage(QWidget):
+
     def __init__(self):
         super().__init__()
         self.body = QVBoxLayout()
@@ -616,10 +625,11 @@ class BorrowManage(QWidget):
         self.searchInput.setText('ID/姓名')
         self.searchInput.setClearButtonEnabled(True)
         self.searchInput.setFixedSize(450, 40)
-        self.searchStudentButton = QToolButton()
-        self.searchStudentButton.setFixedSize(120, 40)
-        self.searchStudentButton.setText('搜索学号')
-        self.searchStudentButton.clicked.connect(lambda: self.searchFunction('SID'))
+        self.searchreaderButton = QToolButton()
+        self.searchreaderButton.setFixedSize(120, 40)
+        self.searchreaderButton.setText('搜索学号')
+        self.searchreaderButton.clicked.connect(
+            lambda: self.searchFunction('SID'))
 
         self.searchBookButton = QToolButton()
         self.searchBookButton.setFixedSize(120, 40)
@@ -630,7 +640,7 @@ class BorrowManage(QWidget):
         searchLayout.addStretch()
         searchLayout.addWidget(self.searchTitle)
         searchLayout.addWidget(self.searchInput)
-        searchLayout.addWidget(self.searchStudentButton)
+        searchLayout.addWidget(self.searchreaderButton)
         searchLayout.addWidget(self.searchBookButton)
         searchLayout.addStretch()
 
@@ -642,10 +652,12 @@ class BorrowManage(QWidget):
     def searchFunction(self, e: str = 'BID'):
         # 搜索书号
         if e == 'BID':
-            self.borrow_list = database.get_borrowing_books(self.searchInput.text(), True)
+            self.borrow_list = database.get_borrowing_books(
+                self.searchInput.text(), True)
         else:
             # 搜索学号
-            self.borrow_list = database.get_borrowing_books(self.searchInput.text())
+            self.borrow_list = database.get_borrowing_books(
+                self.searchInput.text())
             self.SID = self.searchInput.text()
         if self.borrow_list == []:
             print('未找到')
@@ -698,7 +710,8 @@ class BorrowManage(QWidget):
         itemPUNISHED = QLabel()
         itemPUNISHED.setText('0')
         itemPUNISHED.setAlignment(Qt.AlignCenter)
-        isPunished = database.days_between(val[4], time.strftime("%Y-%m-%d-%H:%M"))
+        isPunished = database.days_between(val[4],
+                                           time.strftime("%Y-%m-%d-%H:%M"))
         if isPunished <= 0:
             itemPUNISHED.setStyleSheet('''
                 *{
@@ -719,7 +732,8 @@ class BorrowManage(QWidget):
         itemOPERATE = QToolButton(self.table)
         itemOPERATE.setFixedSize(70, 25)
         itemOPERATE.setText('还书')
-        itemOPERATE.clicked.connect(lambda: self.retrurnBook(val[0], val[1], isPunished))
+        itemOPERATE.clicked.connect(
+            lambda: self.retrurnBook(val[0], val[1], isPunished))
         itemOPERATE.setStyleSheet('''
         *{
             color: white;
@@ -796,6 +810,7 @@ class BorrowManage(QWidget):
 
 
 class HistoryManage(QWidget):
+
     def __init__(self):
         super().__init__()
         self.body = QVBoxLayout()
@@ -829,10 +844,11 @@ class HistoryManage(QWidget):
         self.searchInput.setText('ID/姓名')
         self.searchInput.setClearButtonEnabled(True)
         self.searchInput.setFixedSize(400, 40)
-        self.searchStudentButton = QToolButton()
-        self.searchStudentButton.setFixedSize(120, 40)
-        self.searchStudentButton.setText('搜索学号')
-        self.searchStudentButton.clicked.connect(lambda: self.searchFunction('SID'))
+        self.searchreaderButton = QToolButton()
+        self.searchreaderButton.setFixedSize(120, 40)
+        self.searchreaderButton.setText('搜索学号')
+        self.searchreaderButton.clicked.connect(
+            lambda: self.searchFunction('SID'))
 
         self.searchBookButton = QToolButton()
         self.searchBookButton.setFixedSize(120, 40)
@@ -848,7 +864,7 @@ class HistoryManage(QWidget):
         searchLayout.addStretch()
         searchLayout.addWidget(self.searchTitle)
         searchLayout.addWidget(self.searchInput)
-        searchLayout.addWidget(self.searchStudentButton)
+        searchLayout.addWidget(self.searchreaderButton)
         searchLayout.addWidget(self.searchBookButton)
         searchLayout.addWidget(self.outButton)
         searchLayout.addStretch()
@@ -1007,10 +1023,7 @@ class HistoryManage(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    user_message = {
-        'class': 'master',
-        'ID': 'master'
-    }
+    user_message = {'class': 'master', 'ID': 'master'}
     ex = AdministratorPage(user_message)
     ex.show()
     sys.exit(app.exec_())

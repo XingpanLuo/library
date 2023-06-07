@@ -1,9 +1,12 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout,QLabel, QLineEdit, QToolButton, QPushButton)
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QGridLayout,
+                             QHBoxLayout, QLabel, QLineEdit, QToolButton,
+                             QPushButton)
 from PyQt5.QtCore import Qt
 
 
 class Login(QWidget):
+
     def __init__(self):
         super().__init__()
         self.bodyLayout = QGridLayout()
@@ -27,15 +30,17 @@ class Login(QWidget):
         self.accountInput.setFixedSize(400, 50)
         self.accountInput.setText('账号')
         self.accountInput.setTextMargins(5, 5, 5, 5)
-        self.accountInput.mousePressEvent = lambda x: self.inputClick(self.accountInput)
+        self.accountInput.mousePressEvent = lambda x: self.inputClick(
+            self.accountInput)
         # 密码输入框
         self.passwordInput = QLineEdit()
         self.passwordInput.setFixedSize(400, 50)
         self.passwordInput.setText('******')
         self.passwordInput.setTextMargins(5, 5, 5, 5)
-        self.passwordInput.mousePressEvent = lambda x: self.inputClick(self.passwordInput)
+        self.passwordInput.mousePressEvent = lambda x: self.inputClick(
+            self.passwordInput)
         self.passwordInput.setEchoMode(QLineEdit.Password)
-        
+
         # 注册按钮
         self.signupButton = QPushButton()
         self.signupButton.setText('注 册')
@@ -47,11 +52,11 @@ class Login(QWidget):
         self.loginButton.setFixedSize(100, 60)
 
         # 注册和登录按钮合并在一行(水平布局)
-        self.buttonLayout=QHBoxLayout()
+        self.buttonLayout = QHBoxLayout()
         self.buttonLayout.addWidget(self.signupButton)
         self.buttonLayout.addWidget(self.loginButton)
-        
-        self.buttonBox=QWidget()
+
+        self.buttonBox = QWidget()
         self.buttonBox.setObjectName('buttonBox')
         self.buttonBox.setContentsMargins(10, 10, 10, 10)
         self.buttonBox.setFixedSize(350, 90)

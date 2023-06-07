@@ -1,12 +1,15 @@
 import sys
 from PyQt5.QtWidgets import (QApplication, QWidget, QMessageBox)
-from PyQt5.QtCore import Qt
+# from PyQt5.QtCore import Qt
 from src import login
 from src import signup
 from src import database
 from src import master
+from src import reader
+
 
 class MainWindow(QWidget):
+
     def __init__(self):
         super().__init__()
         self.setLogin()
@@ -14,6 +17,7 @@ class MainWindow(QWidget):
         self.setGeometry(200, 200, 1280, 720)
         self.setFixedSize(1280, 720)
         self.setWindowTitle("图书管理系统")
+
     # 创建登录菜单
     def setLogin(self):
         self.login = login.Login()
@@ -85,8 +89,8 @@ class MainWindow(QWidget):
     def display(self):
         # 显示学生信息
         if self.user['class'] == 'stu':
-            pass 
-            # self.body = student.StudentPage(self.user)
+            pass
+            # self.body = reader.readerPage(self.user)
             # self.body.setParent(self)
             # self.body.setVisible(True)
             # self.body.out.clicked.connect(self.logout)
@@ -97,16 +101,10 @@ class MainWindow(QWidget):
             self.body.out.clicked.connect(self.logout)
 
     def errorBox(self, mes: str):
-        msgBox = QMessageBox(
-            QMessageBox.Warning,
-            "警告!",
-            mes,
-            QMessageBox.NoButton,
-            self
-        )
+        msgBox = QMessageBox(QMessageBox.Warning, "警告!", mes,
+                             QMessageBox.NoButton, self)
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.exec_()
-
 
 
 if __name__ == '__main__':

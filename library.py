@@ -2,8 +2,7 @@
 import sys
 from src import database
 from src import main_widget
-from PyQt5.QtWidgets import QApplication,QMainWindow
-
+from PyQt5.QtWidgets import QApplication  # , QMainWindow
 
 if __name__ == "__main__":
     database.init_database()
