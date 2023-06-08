@@ -1,5 +1,6 @@
 import time
 import pymysql
+import random
 
 CONFIG = {
     "host": '127.0.0.1',
@@ -12,22 +13,6 @@ CONFIG = {
 
 # 检查注册信息
 def check_user_info(info: dict) -> dict:
-    '''
-    info = {
-            'SID': self.accountInput.text(),
-            'PWD': self.passwordInput.text(),
-            'REPWD': self.repPasswordInput.text(),
-            'SNAME': self.nameInput.text(),
-            'DEPARTMENT': self.deptInput.text(),
-            'MAJOR': self.majorInput.text(),
-            'MAX': self.maxNumInput.text(),
-            'PUNISHED': 0
-        }
-    返回 ans = {
-        'res':'fail|seccuss',
-        'reason':''
-    }
-    '''
     ans = {'res': 'fail', 'reason': ''}
     if len(info['SID']) > 15:
         ans['reason'] = 'ID长度超过15'
@@ -37,18 +22,6 @@ def check_user_info(info: dict) -> dict:
         return ans
     if info['PWD'] != info['REPWD']:
         ans['reason'] = '两次输入密码不一致'
-        return ans
-    if not info['MAX'].isdigit():
-        ans['reason'] = '最大数量输入含有非法字符'
-        return ans
-    if int(info['MAX']) > 10:
-        ans['reason'] = '最多只能借阅10本书'
-        return ans
-    if len(info['DEPARTMENT']) > 20:
-        ans['reason'] = '学院名称超过20'
-        return ans
-    if len(info['MAJOR']) > 20:
-        ans['reason'] = '专业名称超过20'
         return ans
     ans['res'] = 'seccuss'
     return ans
@@ -210,8 +183,13 @@ def init_database():
         # book: ID:char(8),name:varchar(10),author:varchar(10),price:float,status:int,borrow_Times:int,reserve_Times:int
         cursor.execute('''
         INSERT
-        INTO book(ID, name, author, price, status, borrow_Times)
-        VALUES('b1', '数据库系统实现', 'Ullman', 59.0, 0, 4);
+        INTO book(ID, name, author, price, status, borrow_Times,reserve_Times)
+        VALUES('b1', '数据库系统实现', 'Ullman', 59.0, 0, 4,1);
+        ''')
+        cursor.execute('''
+        INSERT 
+        INTO book(ID, name, author, price, status, borrow_Times,reserve_Times) 
+        VALUES('b2', '数据结构', 'MAL', 70.0, 0,2,2);
         ''')
         cursor.execute('''
         INSERT
@@ -285,7 +263,7 @@ def signin(user_message: dict) -> dict:
     }
     如果管理员用户存在返回以下字典
     {
-        'class': 'admin'
+        'class': 'master'
         'AID': str
     }
     如果学生用户存在返回以下格式的字典
@@ -716,14 +694,13 @@ def new_book(book_info: dict) -> bool:
     '''
     传入以下格式的字典
     book_msg{
-        'BID': str,
-        'BNAME': str,
+        'ID': str,
+        'NAME': str,
         'AUTHOR': str,
-        'PUBLICATION_DATE': str,
-        'PRESS': str,
-        'POSITION': str,
-        'SUM': int,
-        'CLASSIFICATION': str
+        'PRICE': str,
+        'BORROW_TIMES': str,
+        'RESERVE_TIMES': int,
+        'STATUS': str
     }
     返回bool
     '''
@@ -739,33 +716,27 @@ def new_book(book_info: dict) -> bool:
             '''
             SELECT *
             FROM book
-            WHERE BID=%s
-            ''', (book_info['BID']))
+            WHERE ID=%s
+            ''', (book_info['ID']))
         if len(cursor.fetchall()) != 0:
             raise Exception('书ID已存在!')
+
         # 插入新书
-        cursor.execute(
-            '''
+        borrow_times=random.randint(0,6)
+        reserve_times=random.randint(0,10)
+        status=random.randint(0,2)
+        print(borrow_times,reserve_times,status)
+        cursor.execute('''
         INSERT
-        INTO book
-        VALUES(%s, %s, %s, %s, %s, %s, %d, %d)
-        ''', (book_info['BID'], book_info['BNAME'], book_info['AUTHOR'],
-              book_info['PUBLICATION_DATE'], book_info['PRESS'],
-              book_info['POSITION'], book_info['SUM'], book_info['SUM']))
-
-        # 处理书本分类
-        classifications = book_info['CLASSIFICATION']
-        classifications = classifications.split()
-        classifications = list(set(classifications))
-        classifications = [(book_info['BID'], i) for i in classifications]
-        # 插入分类
-        cursor.executemany(
-            '''
-        INSERT
-        INTO classification
-        VALUES(%s, %s)
-        ''', classifications)
-
+        INTO book(ID,NAME,AUTHOR,PRICE,BORROW_TIMES,RESERVE_TIMES,STATUS)
+        VALUES(%s, %s, %s, %s, %s, %s, %s)
+        ''', (
+            book_info['ID'],
+            book_info['NAME'],
+            book_info['AUTHOR'],
+            book_info['PRICE'],
+            borrow_times,reserve_times,status
+        ))
         conn.commit()
     except Exception as e:
         print('add book error!')
@@ -776,18 +747,18 @@ def new_book(book_info: dict) -> bool:
             conn.close()
         return res
 
-
 # 获取新书详细信息
-def get_book_info(BID: str) -> dict:
+def get_book_info(ID: str) -> dict:
     '''
-    传入BID
+    传入ID
     返回book_msg{
-        'BID': str,
-        'BNAME': str,
+        'ID': str,
+        'NAME': str,
         'AUTHOR': str,
         'PRICE': str,
-        'STATUS':str,
-        'BORROW_TIMES': str
+        'BORROW_TIMES': str,
+        'RESERVE_TIMES': int,
+        'STATUS': str
     }
     '''
     try:
@@ -802,27 +773,14 @@ def get_book_info(BID: str) -> dict:
             '''
             SELECT *
             FROM book
-            WHERE BID=%s
-            ''', (BID))
+            WHERE ID=%s
+            ''', (ID))
         res = cursor.fetchall()
         if len(res) == 0:
             raise Exception('查无此书')
 
-        # # 获取分类
-        # cursor.execute('''
-        # SELECT CLASSIFICATION
-        # FROM classification
-        # WHERE BID=%s
-        # ''', (BID))
-        # CLASSIFICATION = ''
-        # for i in cursor.fetchall():
-        #     CLASSIFICATION += (remove_blank(i[0]) + ' ')
-        # 把列表转换为字典
         res = list(res[0])
-        # res.append(CLASSIFICATION)
-        key_list = [
-            'BID', 'BNAME', 'AUTHOR', 'PRICE', 'STATUS', 'BORROW_TIMES'
-        ]
+        key_list = ['ID', 'NAME', 'AUTHOR', 'PRICE',  'BORROW_TIMES','RESERVE_TIMES','STATUS']
         ans = {}
         for i, key in zip(res, key_list):
             ans[key] = i
@@ -841,21 +799,6 @@ def get_book_info(BID: str) -> dict:
 
 # 更新书籍信息
 def update_book(book_info: dict) -> bool:
-    '''
-    传入以下格式的字典
-    book_msg{
-        'BID': str,
-        'BNAME': str,
-        'AUTHOR': str,
-        'PUBLICATION_DATE': str,
-        'PRESS': str,
-        'POSITION': str,
-        'SUM': int,
-        'NUM': int,
-        'CLASSIFICATION': str
-    }
-    返回bool
-    '''
     try:
         res = True
         conn = pymysql.connect(host=CONFIG['host'],
@@ -868,31 +811,14 @@ def update_book(book_info: dict) -> bool:
         cursor.execute(
             '''
             UPDATE book
-            SET BNAME=%s, AUTHOR=%s, PUBLICATION_DATE=%s, PRESS=%s, POSITION=%s, SUM=%d, NUM=%d
-            WHERE BID=%s
-            ''', (book_info['BNAME'], book_info['AUTHOR'],
-                  book_info['PUBLICATION_DATE'], book_info['PRESS'],
-                  book_info['POSITION'], book_info['SUM'], book_info['NUM'],
-                  book_info['BID']))
-
-        # 更新classification表
-        cursor.execute(
-            '''
-        DELETE
-        FROM classification
-        WHERE BID=%s''', (book_info['BID']))
-        # 处理书本分类
-        classifications = book_info['CLASSIFICATION']
-        classifications = classifications.split()
-        classifications = list(set(classifications))
-        classifications = [(book_info['BID'], i) for i in classifications]
-        # 插入分类
-        cursor.executemany(
-            '''
-        INSERT
-        INTO classification
-        VALUES(%s, %s)
-        ''', classifications)
+            SET NAME=%s, AUTHOR=%s, PRICE=%s
+            WHERE ID=%s
+            ''', (
+                book_info['NAME'],
+                book_info['AUTHOR'],
+                book_info['PRICE'],
+                book_info['ID']
+            ))
 
         conn.commit()
     except Exception as e:
@@ -906,7 +832,7 @@ def update_book(book_info: dict) -> bool:
 
 
 # 删除书籍
-def delete_book(BID: str) -> bool:
+def delete_book(ID: str) -> bool:
     '''
     传入BID
     返回bool
@@ -924,17 +850,18 @@ def delete_book(BID: str) -> bool:
             '''
             DELETE
             FROM book
-            WHERE BID=%s
-            DELETE
-            FROM borrowing_book
-            WHERE BID=%s
-            DELETE
-            FROM log
-            WHERE BID=%s
-            DELETE
-            FROM classification
-            WHERE BID=%s
-            ''', (BID, BID, BID, BID))
+            WHERE ID=%s;
+            ''', (ID))
+        cursor.execute('''
+            DELETE 
+            FROM borrow
+            WHERE book_ID=%s;   
+            ''',(ID))
+        cursor.execute('''
+            DELETE 
+            FROM reserve
+            WHERE book_ID=%s;   
+            ''',(ID))
         conn.commit()
     except Exception as e:
         print('delete book error!')
@@ -962,13 +889,13 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
         cursor = conn.cursor()
 
         # 显示所有书信息
-        if info == 'ID/书名/作者/出版社' or info == '':
+        if info == 'ID/书名/作者' or info == '':
             cursor.execute('''
             SELECT *
             FROM book;
             ''')
             res = tuple_to_list(cursor.fetchall())
-        elif restrict != 'BID':
+        elif restrict != 'ID':
             # AUTHOR或PRESS或BNAME
             cursor.execute(
                 f'''
@@ -977,7 +904,7 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
             WHERE {restrict} LIKE %s
             ''', ('%' + info + '%'))
             res = tuple_to_list(cursor.fetchall())
-        elif restrict == 'BID':
+        elif restrict == 'ID':
             # BID
             cursor.execute(
                 '''
@@ -986,44 +913,6 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
             WHERE ID = %s;
             ''', (info))
             res = tuple_to_list(cursor.fetchall())
-
-        # 匹配学生信息判断每一本书是否可借
-        if SID != '':
-            # 获得学生最大借书数
-            cursor.execute(
-                '''
-            SELECT MAX
-            FROM reader
-            WHERE SID=%s
-            ''', (SID))
-            max_num = cursor.fetchall()[0][0]
-            # 获取已经借阅的书的列表
-            borrowing_book = get_borrowing_books(SID)
-            # 判断是否有罚金
-            punish = False
-            for i in borrowing_book:
-                if i[4] < time.strftime("%Y-%m-%d-%H:%M"):
-                    punish = True
-                    break
-            for book in res:
-                # 有罚金没交
-                if punish:
-                    book.append('未交罚金')
-                    continue
-                # 如果已经借的书达到上限就不再可借
-                if len(borrowing_book) >= max_num:
-                    book.append('借书达上限')
-                    continue
-                if book[-2] == 0:
-                    book.append('没有剩余')
-                    continue
-                # 判断是否有此书
-                for borrow in borrowing_book:
-                    if book[0] == borrow[1]:
-                        book.append('已借此书')
-                        break
-                if book[-1] != '已借此书':
-                    book.append('借书')
     except Exception as e:
         print('Search error!')
         print(e)
@@ -1098,34 +987,35 @@ def encrypt(val):
 
 
 if __name__ == '__main__':
-    temp = {
-        'SID': '201603',
-        'PWD': 'ustc',
-        'SNAME': '小王',
-        'DEPARTMENT': '数学与信息科学学院',
-        'MAJOR': 'SE',
-        'MAX': 5,
-        'PUNISHED': 0
-    }
-    user_message = {
-        'SID': '1',
-        'SNAME': '1',
-        'PWD': '123456',
-        'DEPARTMENT': '1',
-        'MAJOR': '2',
-        'MAX': 5
-    }
-    temp_login = {'ID': '1', 'PWD': 'ustc'}
-    book_msg = {
-        'BID': '444',
-        'BNAME': 'Java',
-        'AUTHOR': 'kak',
-        'PUBLICATION_DATE': '2009-05',
-        'PRESS': '电子出版社',
-        'POSITION': 'C05',
-        'SUM': 5,
-        'CLASSIFICATION': 'a s ad das d'
-    }
+    pass
+    # temp = {
+    #     'SID': '201603',
+    #     'PWD': 'ustc',
+    #     'SNAME': '小王',
+    #     'DEPARTMENT': '数学与信息科学学院',
+    #     'MAJOR': 'SE',
+    #     'MAX': 5,
+    #     'PUNISHED': 0
+    # }
+    # user_message = {
+    #     'SID': '1',
+    #     'SNAME': '1',
+    #     'PWD': '123456',
+    #     'DEPARTMENT': '1',
+    #     'MAJOR': '2',
+    #     'MAX': 5
+    # }
+    # temp_login = {'ID': '1', 'PWD': 'ustc'}
+    # book_msg = {
+    #     'BID': '444',
+    #     'BNAME': 'Java',
+    #     'AUTHOR': 'kak',
+    #     'PUBLICATION_DATE': '2009-05',
+    #     'PRESS': '电子出版社',
+    #     'POSITION': 'C05',
+    #     'SUM': 5,
+    #     'CLASSIFICATION': 'a s ad das d'
+    # }
     # 注册测试
     # print(signup(temp))
 
