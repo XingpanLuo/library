@@ -893,14 +893,14 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
             FROM book;
             ''')
             res = tuple_to_list(cursor.fetchall())
-        elif restrict != 'ID':
+        elif restrict == 'name' or restrict == 'author':
             # AUTHOR或PRESS或BNAME
-            cursor.execute(
-                f'''
+            info = '\"%' + info + '%\"'
+            cursor.execute(f'''
             SELECT *
             FROM book
-            WHERE {restrict} LIKE %s
-            ''', ('%' + info + '%'))
+            WHERE {restrict} LIKE {info}
+            ''')
             res = tuple_to_list(cursor.fetchall())
         elif restrict == 'ID':
             # BID

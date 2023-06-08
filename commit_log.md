@@ -16,3 +16,9 @@
 1. 修改 `main_widget.py` 的 90 行增加了 reader 内容。
 2. 修改 database 211,972,980 行数据错误。
 3. 修改 main_widget.py
+
+## 提交3 by xyp
+
+1. 修改 database.py 的 search_book 逻辑
+
+（有事暂时离开，先只提交一点）
