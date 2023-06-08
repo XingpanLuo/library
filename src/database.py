@@ -216,7 +216,7 @@ def init_database():
         cursor.execute('''
         INSERT
         INTO reader(ID,name,email,pwd,headshot)
-        VALUES('r1', 'lihua', 'a@qq.com', 'password', './headshot/r1.png');
+        VALUES('r1', 'lihua', 'a@qq.com', 'r1', './headshot/r1.png');
         ''')
         conn.commit()
     except Exception as e:
@@ -968,7 +968,7 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
             FROM book;
             ''')
             res = tuple_to_list(cursor.fetchall())
-        elif restrict != 'BID':
+        elif restrict != 'ID':
             # AUTHOR或PRESS或BNAME
             cursor.execute(
                 f'''
@@ -977,7 +977,7 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
             WHERE {restrict} LIKE %s
             ''', ('%' + info + '%'))
             res = tuple_to_list(cursor.fetchall())
-        elif restrict == 'BID':
+        elif restrict == 'ID':
             # BID
             cursor.execute(
                 '''
