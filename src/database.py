@@ -187,8 +187,8 @@ def init_database():
         VALUES('b1', '数据库系统实现', 'Ullman', 59.0, 0, 4,1);
         ''')
         cursor.execute('''
-        INSERT 
-        INTO book(ID, name, author, price, status, borrow_Times,reserve_Times) 
+        INSERT
+        INTO book(ID, name, author, price, status, borrow_Times,reserve_Times)
         VALUES('b2', '数据结构', 'MAL', 70.0, 0,2,2);
         ''')
         cursor.execute('''
@@ -722,21 +722,17 @@ def new_book(book_info: dict) -> bool:
             raise Exception('书ID已存在!')
 
         # 插入新书
-        borrow_times=random.randint(0,6)
-        reserve_times=random.randint(0,10)
-        status=random.randint(0,2)
-        print(borrow_times,reserve_times,status)
-        cursor.execute('''
+        borrow_times = random.randint(0, 6)
+        reserve_times = random.randint(0, 10)
+        status = random.randint(0, 2)
+        print(borrow_times, reserve_times, status)
+        cursor.execute(
+            '''
         INSERT
         INTO book(ID,NAME,AUTHOR,PRICE,BORROW_TIMES,RESERVE_TIMES,STATUS)
         VALUES(%s, %s, %s, %s, %s, %s, %s)
-        ''', (
-            book_info['ID'],
-            book_info['NAME'],
-            book_info['AUTHOR'],
-            book_info['PRICE'],
-            borrow_times,reserve_times,status
-        ))
+        ''', (book_info['ID'], book_info['NAME'], book_info['AUTHOR'],
+              book_info['PRICE'], borrow_times, reserve_times, status))
         conn.commit()
     except Exception as e:
         print('add book error!')
@@ -746,6 +742,7 @@ def new_book(book_info: dict) -> bool:
         if conn:
             conn.close()
         return res
+
 
 # 获取新书详细信息
 def get_book_info(ID: str) -> dict:
@@ -780,7 +777,10 @@ def get_book_info(ID: str) -> dict:
             raise Exception('查无此书')
 
         res = list(res[0])
-        key_list = ['ID', 'NAME', 'AUTHOR', 'PRICE',  'BORROW_TIMES','RESERVE_TIMES','STATUS']
+        key_list = [
+            'ID', 'NAME', 'AUTHOR', 'PRICE', 'BORROW_TIMES', 'RESERVE_TIMES',
+            'STATUS'
+        ]
         ans = {}
         for i, key in zip(res, key_list):
             ans[key] = i
@@ -813,12 +813,8 @@ def update_book(book_info: dict) -> bool:
             UPDATE book
             SET NAME=%s, AUTHOR=%s, PRICE=%s
             WHERE ID=%s
-            ''', (
-                book_info['NAME'],
-                book_info['AUTHOR'],
-                book_info['PRICE'],
-                book_info['ID']
-            ))
+            ''', (book_info['NAME'], book_info['AUTHOR'], book_info['PRICE'],
+                  book_info['ID']))
 
         conn.commit()
     except Exception as e:
@@ -852,16 +848,18 @@ def delete_book(ID: str) -> bool:
             FROM book
             WHERE ID=%s;
             ''', (ID))
-        cursor.execute('''
-            DELETE 
+        cursor.execute(
+            '''
+            DELETE
             FROM borrow
-            WHERE book_ID=%s;   
-            ''',(ID))
-        cursor.execute('''
-            DELETE 
+            WHERE book_ID=%s;
+            ''', (ID))
+        cursor.execute(
+            '''
+            DELETE
             FROM reserve
-            WHERE book_ID=%s;   
-            ''',(ID))
+            WHERE book_ID=%s;
+            ''', (ID))
         conn.commit()
     except Exception as e:
         print('delete book error!')
