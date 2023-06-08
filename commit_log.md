@@ -14,4 +14,5 @@
 ## 提交2 by xyp
 
 1. 修改 `main_widget.py` 的 90 行增加了 reader 内容。
-2. 修改 database 211,972,980 行。
+2. 修改 database 211,972,980 行数据错误。
+3. 修改 main_widget.py
