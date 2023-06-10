@@ -87,13 +87,12 @@ class MainWindow(QWidget):
         self.login.setVisible(True)
 
     def display(self):
-        # 显示学生信息
-        if self.user['class'] == 'stu':
-            pass
-            # self.body = reader.readerPage(self.user)
-            # self.body.setParent(self)
-            # self.body.setVisible(True)
-            # self.body.out.clicked.connect(self.logout)
+        # 显示读者信息
+        if self.user['class'] == 'reader':
+            self.body = reader.readerPage(self.user)
+            self.body.setParent(self)
+            self.body.setVisible(True)
+            self.body.out.clicked.connect(self.logout)
         else:
             self.body = master.AdministratorPage(self.user)
             self.body.setParent(self)

@@ -10,3 +10,15 @@
 6. 同一文件 323 行的 sql 语句应该有小的引号。
 7. import 未引用的我都删了（因为我这边 pylint 到处报错）
 8. reader 的 lilin 我改成了 lihua
+
+## 提交2 by xyp
+
+1. 修改 `main_widget.py` 的 90 行增加了 reader 内容。
+2. 修改 database 211,972,980 行数据错误。
+3. 修改 main_widget.py
+
+## 提交3 by xyp
+
+1. 修改 database.py 的 search_book 逻辑
+
+（有事暂时离开，先只提交一点）

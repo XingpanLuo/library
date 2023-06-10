@@ -202,7 +202,7 @@ def init_database():
         cursor.execute('''
         INSERT
         INTO reader(ID,name,email,pwd,headshot)
-        VALUES('r1', 'lihua', 'a@qq.com', 'password', './headshot/r1.png');
+        VALUES('r1', 'lihua', 'a@qq.com', 'r1', './headshot/r1.png');
         ''')
         
         cursor.execute('''
@@ -830,6 +830,7 @@ def new_book(book_info: dict) -> bool:
             conn.close()
         return res
 
+
 # 获取新书详细信息
 def get_book_info(ID: str) -> dict:
     '''
@@ -863,7 +864,10 @@ def get_book_info(ID: str) -> dict:
             raise Exception('查无此书')
 
         res = list(res[0])
-        key_list = ['ID', 'NAME', 'AUTHOR', 'PRICE',  'BORROW_TIMES','RESERVE_TIMES','STATUS']
+        key_list = [
+            'ID', 'NAME', 'AUTHOR', 'PRICE', 'BORROW_TIMES', 'RESERVE_TIMES',
+            'STATUS'
+        ]
         ans = {}
         for i, key in zip(res, key_list):
             ans[key] = i
@@ -896,12 +900,8 @@ def update_book(book_info: dict) -> bool:
             UPDATE book
             SET NAME=%s, AUTHOR=%s, PRICE=%s
             WHERE ID=%s
-            ''', (
-                book_info['NAME'],
-                book_info['AUTHOR'],
-                book_info['PRICE'],
-                book_info['ID']
-            ))
+            ''', (book_info['NAME'], book_info['AUTHOR'], book_info['PRICE'],
+                  book_info['ID']))
 
         conn.commit()
     except Exception as e:
@@ -923,7 +923,6 @@ def delete_book(ID: str):
                                db=CONFIG['db'],
                                 )
         cursor = conn.cursor()
-
         # 执行存储过程
         print(ID)
         cursor.callproc('delete_book', args=(ID,"",""))
@@ -971,14 +970,14 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
             FROM book;
             ''')
             res = tuple_to_list(cursor.fetchall())
-        elif restrict != 'ID':
+        elif restrict == 'name' or restrict == 'author':
             # AUTHOR或PRESS或BNAME
-            cursor.execute(
-                f'''
+            info = '\"%' + info + '%\"'
+            cursor.execute(f'''
             SELECT *
             FROM book
-            WHERE {restrict} LIKE %s
-            ''', ('%' + info + '%'))
+            WHERE {restrict} LIKE {info}
+            ''')
             res = tuple_to_list(cursor.fetchall())
         elif restrict == 'ID':
             # BID
