@@ -136,7 +136,6 @@ class BookInfo(QGroupBox):
     def initUI(self):
         self.setFixedSize(422, 550)
         self.setWindowTitle('修改书籍')
-        #self.setMyStyle()
     
     def errorBox(self, mes: str):
         msgBox = QMessageBox(
@@ -149,8 +148,6 @@ class BookInfo(QGroupBox):
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.exec_()
 
-    def setMyStyle(self):
-        pass
 
 
 if __name__ == '__main__':

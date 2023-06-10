@@ -29,8 +29,8 @@ master: ID:char(8),name:varchar(10),email:varchar(30),pwd:char(64),headshot:varc
 
 book: ID:char(8),name:varchar(10),author:varchar(10),price:float,status:int,borrow_Times:int,reserve_Times:int
 
-borrow: book_ID:char(8),reader_ID:char(8),borrow_Date:date,return_Date:date
+borrow: reader_ID:char(8),book_ID:char(8),borrow_Date:date,return_Date:date
 
-reserve: book_ID:char(8),reader_ID:char(8),reserve_Date:date,take_Date:date
+reserve: reader_ID:char(8),book_ID:char(8),reserve_Date:date,take_Date:date
 
 violation: reader_ID:char(8),book_ID(8),borrow_Date:date

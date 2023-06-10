@@ -1,7 +1,11 @@
 import time
 import pymysql
+import pymysql.cursors
 import random
-
+try:
+    from src import db
+except:
+    import db
 CONFIG = {
     "host": '127.0.0.1',
     "user": 'root',
@@ -58,13 +62,12 @@ def convert(val: list):
         return None
     val = val[0]
     # 如果是学生
-    if len(val) == 5:
+    if len(val) == 3:
         ans = {
             'class': 'reader',
             'ID': remove_blank(val[0]),
-            'name': remove_blank(val[1]),
-            'email': remove_blank(val[2]),
-            'headshot': remove_blank(val[3]),
+            'NAME': remove_blank(val[1]),
+            'EMAIL': remove_blank(val[2])
         }
     else:
         ans = {'class': 'master', 'ID': remove_blank(val[0])}
@@ -149,8 +152,8 @@ def init_database():
 
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS borrow(
-            book_ID char(8),
             reader_ID char(8),
+            book_ID char(8),
             borrow_Date date,
             return_Date date,
             PRIMARY KEY(book_ID, reader_ID)
@@ -159,8 +162,8 @@ def init_database():
 
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS reserve(
-            book_ID char(8),
             reader_ID char(8),
+            book_ID char(8),
             reserve_Date date,
             take_Date date,
             PRIMARY KEY(book_ID, reader_ID)
@@ -184,18 +187,46 @@ def init_database():
         cursor.execute('''
         INSERT
         INTO book(ID, name, author, price, status, borrow_Times,reserve_Times)
-        VALUES('b1', '数据库系统实现', 'Ullman', 59.0, 0, 4,1);
+        VALUES('b1', '数据库系统实现', 'Ullman', 59.0, 1, 4,1);
         ''')
         cursor.execute('''
         INSERT 
         INTO book(ID, name, author, price, status, borrow_Times,reserve_Times) 
-        VALUES('b2', '数据结构', 'MAL', 70.0, 0,2,2);
+        VALUES('b2', '数据结构', 'MAL', 70.0, 2,7,9);
+        ''')
+        cursor.execute('''
+        INSERT 
+        INTO book(ID, name, author, price, status, borrow_Times,reserve_Times) 
+        VALUES('b3', '组成原理', 'zxh', 68.0, 0,5,2);
         ''')
         cursor.execute('''
         INSERT
         INTO reader(ID,name,email,pwd,headshot)
         VALUES('r1', 'lihua', 'a@qq.com', 'password', './headshot/r1.png');
         ''')
+        
+        cursor.execute('''
+        INSERT
+        INTO reader(ID,name,email,pwd,headshot)
+        VALUES('r2', 'lilin', 'b@ustc.edu.cn', 'password', './headshot/r1.png');
+        ''')
+        
+        cursor.execute('''
+        INSERT
+        INTO borrow(reader_ID,book_ID,borrow_Date)
+        VALUES('r1','b1','2023-5-8') 
+        ''')
+        
+        cursor.execute('''
+        INSERT
+        INTO borrow(reader_ID,book_ID,borrow_Date,return_Date)
+        VALUES('r2','b1','2023-7-8','2023-9-30') 
+        ''')
+        db.create_procedure_add_book(cursor)
+        db.create_procedure_delete_book(cursor)
+        db.create_borrow_view(cursor)
+        db.create_reserve_view(cursor)
+        db.create_violation_view(cursor)
         conn.commit()
     except Exception as e:
         # print('Init fall 如果数据库已经成功初始化则无视此条警告')
@@ -322,9 +353,9 @@ def update_reader(user_message: dict) -> bool:
     '''
     传入字典格式如下
     user_message{
-        'SID': str,
-        'PWD': str,
-        'SNAME': str,
+        'ID': str,
+        'NAME': str,
+        'EMAIL': str,
         'DEPARTMENT': str,
         'MAJOR': str,
         'MAX': int
@@ -342,18 +373,11 @@ def update_reader(user_message: dict) -> bool:
         cursor.execute(
             '''
             UPDATE reader
-            SET SNAME=%s, DEPARTMENT=%s, MAJOR=%s, MAX=%s
-            WHERE SID=%s
+            SET NAME=%s, EMAIL=%s
+            WHERE ID=%s
             ''',
-            (user_message['SNAME'], user_message['DEPARTMENT'],
-             user_message['MAJOR'], user_message['MAX'], user_message['SID']))
-        if 'PWD' in user_message:
-            cursor.execute(
-                '''
-            UPDATE reader
-            SET PWD=%s
-            WHERE SID=%s
-            ''', (user_message['PWD'], user_message['SID']))
+            (user_message['NAME'], user_message['email'],
+             user_message['ID']))
         conn.commit()
     except Exception as e:
         print('Update error!')
@@ -366,18 +390,7 @@ def update_reader(user_message: dict) -> bool:
 
 
 # 获取学生信息
-def get_reader_info(SID: str) -> dict:
-    '''
-    传入SID
-    返回stu_info{
-        'class': stu,
-        'SID': str,
-        'SNAME': str,
-        'DEPARTMENT': str,
-        'MAJOR': str,
-        'MAX': int
-    }
-    '''
+def get_reader_info(ID: str) -> dict:
     try:
         conn = pymysql.connect(host=CONFIG['host'],
                                user=CONFIG['user'],
@@ -387,10 +400,10 @@ def get_reader_info(SID: str) -> dict:
         cursor = conn.cursor()
         cursor.execute(
             '''
-            SELECT SID, SNAME, DEPARTMENT, MAJOR, MAX
+            SELECT ID, NAME, EMAIL
             FROM reader
-            WHERE SID=%s
-            ''', (SID))
+            WHERE ID=%s
+            ''', (ID))
         ans = cursor.fetchall()
     except Exception as e:
         print(e)
@@ -403,10 +416,6 @@ def get_reader_info(SID: str) -> dict:
 
 # 查找学生
 def search_reader(info: str) -> list:
-    '''
-    传入SID或学生姓名进行查找
-    返回[[SID, SNAME, DEPARTMENT, MAJOR, MAX],...]
-    '''
     try:
         res = []
         val = info.split()
@@ -500,12 +509,7 @@ def delete_reader(SID: str) -> bool:
 
 
 # 获取学生的借书信息
-def get_borrowing_books(ID: str, BID: bool = False) -> list:
-    '''
-    当BID为False以SID的方式查找否则以BID查找
-    返回此学生在借的书籍列表信息
-    [[SID, BID, BNAME, BORROW_DATE, DEADLINE, PUNISH, NUM],[...],....]
-    '''
+def get_borrow_list(ID: str, BID: bool = False) -> list:
     try:
         conn = pymysql.connect(host=CONFIG['host'],
                                user=CONFIG['user'],
@@ -513,26 +517,26 @@ def get_borrowing_books(ID: str, BID: bool = False) -> list:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
-        if ID == '' or ID == 'ID/姓名':
-            cursor.execute('''
-                SELECT SID, book.BID, BNAME, BORROW_DATE, DEADLINE, PUNISH, NUM
-                FROM borrowing_book, book
-                WHERE book.BID=borrowing_book.BID
-            ''')
+        if ID == '' or ID == 'ID':
+            cursor.execute(
+                '''
+                SELECT *
+                FROM borrow_view;
+                '''
+            )
         elif BID:
             cursor.execute(
                 '''
-                SELECT SID, book.BID, BNAME, BORROW_DATE, DEADLINE, PUNISH, NUM
-                FROM borrowing_book, book
-                WHERE book.BID=%s AND book.BID=borrowing_book.BID
-            ''', (ID, ))
+                SELECT *
+                FROM borrow_view
+                WHERE book_ID=%s
+                ''',(ID))
         else:
-            cursor.execute(
-                '''
-                SELECT SID, book.BID, BNAME, BORROW_DATE, DEADLINE, PUNISH, NUM
-                FROM borrowing_book, book
-                WHERE SID=%s AND book.BID=borrowing_book.BID
-            ''', (ID, ))
+            cursor.execute('''
+                SELECT *
+                FROM borrow_view
+                WHERE reader_ID=%s
+            ''',(ID))
         res = cursor.fetchall()
         temp = []
         for i in res:
@@ -550,6 +554,96 @@ def get_borrowing_books(ID: str, BID: bool = False) -> list:
             conn.close()
         return res
 
+# 获取学生的预约信息
+def get_reserve_list(ID: str, BID: bool = False) -> list:
+    try:
+        conn = pymysql.connect(host=CONFIG['host'],
+                               user=CONFIG['user'],
+                               passwd=CONFIG['pwd'],
+                               port=CONFIG['port'],
+                               db=CONFIG['db'])
+        cursor = conn.cursor()
+        if ID == '' or ID == 'ID':
+            cursor.execute(
+                '''
+                SELECT *
+                FROM reserve_view;
+                '''
+            )
+        elif BID:
+            cursor.execute(
+                '''
+                SELECT *
+                FROM reserve_view
+                WHERE book_ID=%s
+                ''',(ID))
+        else:
+            cursor.execute('''
+                SELECT *
+                FROM reserve_view
+                WHERE reader_ID=%s
+            ''',(ID))
+        res = cursor.fetchall()
+        temp = []
+        for i in res:
+            temp_ = []
+            for j in i:
+                temp_.append(remove_blank(j))
+            temp.append(temp_)
+        res = temp
+    except Exception as e:
+        print('get borrowing books error!')
+        print(e)
+        res = []
+    finally:
+        if conn:
+            conn.close()
+        return res
+
+def get_violation_list(ID: str, BID: bool = False) -> list:
+    try:
+        conn = pymysql.connect(host=CONFIG['host'],
+                               user=CONFIG['user'],
+                               passwd=CONFIG['pwd'],
+                               port=CONFIG['port'],
+                               db=CONFIG['db'])
+        cursor = conn.cursor()
+        if ID == '' or ID == 'ID':
+            cursor.execute(
+                '''
+                SELECT *
+                FROM violation_view;
+                '''
+            )
+        elif BID:
+            cursor.execute(
+                '''
+                SELECT *
+                FROM violation_view
+                WHERE book_ID=%s
+                ''',(ID))
+        else:
+            cursor.execute('''
+                SELECT *
+                FROM violation_view
+                WHERE reader_ID=%s
+            ''',(ID))
+        res = cursor.fetchall()
+        temp = []
+        for i in res:
+            temp_ = []
+            for j in i:
+                temp_.append(remove_blank(j))
+            temp.append(temp_)
+        res = temp
+    except Exception as e:
+        print('get borrowing books error!')
+        print(e)
+        res = []
+    finally:
+        if conn:
+            conn.close()
+        return res
 
 # 还书
 def return_book(BID: str, SID: str) -> bool:
@@ -638,10 +732,6 @@ def pay(BID: str, SID: str, PUNISH: int) -> bool:
 
 # 获取历史记录
 def get_log(ID: str, BID: bool = False) -> list:
-    '''
-    传入SID
-    返回[[SID, BID, BNAME, BORROW_DATE, BACK_DATE, PUNISHED],...]
-    '''
     try:
         conn = pymysql.connect(host=CONFIG['host'],
                                user=CONFIG['user'],
@@ -649,7 +739,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
-        if ID == '' or ID == 'ID/姓名':
+        if ID == '' or ID == 'ID':
             cursor.execute('''
                 SELECT SID, book.BID, BNAME, BORROW_DATE, BACK_DATE, PUNISHED
                 FROM log, book
@@ -722,21 +812,14 @@ def new_book(book_info: dict) -> bool:
             raise Exception('书ID已存在!')
 
         # 插入新书
-        borrow_times=random.randint(0,6)
-        reserve_times=random.randint(0,10)
-        status=random.randint(0,2)
-        print(borrow_times,reserve_times,status)
-        cursor.execute('''
-        INSERT
-        INTO book(ID,NAME,AUTHOR,PRICE,BORROW_TIMES,RESERVE_TIMES,STATUS)
-        VALUES(%s, %s, %s, %s, %s, %s, %s)
-        ''', (
+        result_args = cursor.callproc('add_book', args=(
             book_info['ID'],
             book_info['NAME'],
             book_info['AUTHOR'],
             book_info['PRICE'],
-            borrow_times,reserve_times,status
+            0
         ))
+        print(result_args)
         conn.commit()
     except Exception as e:
         print('add book error!')
@@ -830,48 +913,41 @@ def update_book(book_info: dict) -> bool:
             conn.close()
         return res
 
-
-# 删除书籍
-def delete_book(ID: str) -> bool:
-    '''
-    传入BID
-    返回bool
-    会删除book，borrowing_book，log, classification 表内所有对应的记录
-    '''
+def delete_book(ID: str):
     try:
         res = True
         conn = pymysql.connect(host=CONFIG['host'],
                                user=CONFIG['user'],
                                passwd=CONFIG['pwd'],
                                port=CONFIG['port'],
-                               db=CONFIG['db'])
+                               db=CONFIG['db'],
+                                )
         cursor = conn.cursor()
-        cursor.execute(
-            '''
-            DELETE
-            FROM book
-            WHERE ID=%s;
-            ''', (ID))
-        cursor.execute('''
-            DELETE 
-            FROM borrow
-            WHERE book_ID=%s;   
-            ''',(ID))
-        cursor.execute('''
-            DELETE 
-            FROM reserve
-            WHERE book_ID=%s;   
-            ''',(ID))
-        conn.commit()
-    except Exception as e:
-        print('delete book error!')
-        print(e)
-        res = False
-    finally:
-        if conn:
-            conn.close()
-        return res
 
+        # 执行存储过程
+        print(ID)
+        cursor.callproc('delete_book', args=(ID,"",""))
+
+        res=cursor.execute("SELECT @_delete_book_1, @_delete_book_2")
+        print(res)
+        result = cursor.fetchall()
+        
+        result_bool = bool(result[0][0])
+        result_str = str(result[0][1])
+        print(result_bool,result_str)
+        # 根据存储过程的返回值来提交或回滚事务
+        if not result:
+            conn.rollback()
+        else:
+            conn.commit()
+        
+        return result_bool,result_str
+    except:
+        conn.rollback()
+        raise
+    finally:
+        # 恢复自动提交
+        conn.autocommit(True)
 
 # 搜索书籍
 def search_book(info: str, restrict: str, SID: str = '') -> list:
@@ -1020,9 +1096,9 @@ if __name__ == '__main__':
     # print(signup(temp))
 
     # 还书测试
-    # print(get_borrowing_books('', True))
+    # print(get_borrow_list('', True))
     # print(return_book('0001', '1'))
-    # print(get_borrowing_books('1'))
+    # print(get_borrow_list('1'))
 
     # 登录测试
     # print(signin(temp_login))
