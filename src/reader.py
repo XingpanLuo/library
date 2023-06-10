@@ -9,7 +9,7 @@ from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, QSize
 from src import database
 # from src import reader_information
-# from src import book_information
+from src import book_information
 # import database
 # import reader_information
 # import book_information
@@ -151,7 +151,7 @@ class readerPage(QWidget):
         if self.content is not None:
             self.content.deleteLater()
         if self.focus == 0:
-            self.content = BookSearch()
+            self.content = BookSearch(self.info['ID'])
         elif self.focus == 1:
             self.content = ReaderManage()
         elif self.focus == 2:
@@ -220,11 +220,12 @@ class readerPage(QWidget):
 # 书籍查询
 class BookSearch(QGroupBox):
 
-    def __init__(self):
+    def __init__(self, SID: str):
         super().__init__()
         self.book_list = []
         self.body = QVBoxLayout()
         self.table = None
+        self.SID = SID
         self.setTitleBar()
         self.setSearchBar()
         self.searchFunction()
@@ -251,17 +252,12 @@ class BookSearch(QGroupBox):
         self.searchButton.setFixedSize(100, 40)
         self.searchButton.setText('搜索')
         self.searchButton.clicked.connect(self.searchFunction)
-        self.addNewBookButton = QToolButton()
-        self.addNewBookButton.setFixedSize(120, 40)
-        self.addNewBookButton.setText('新增书籍')
-        self.addNewBookButton.clicked.connect(self.addNewBookFunction)
         searchLayout = QHBoxLayout()
         searchLayout.addStretch()
         searchLayout.addWidget(self.selectBox)
         searchLayout.addWidget(self.searchTitle)
         searchLayout.addWidget(self.searchInput)
         searchLayout.addWidget(self.searchButton)
-        searchLayout.addWidget(self.addNewBookButton)
         searchLayout.addStretch()
         self.searchWidget = QWidget()
         self.searchWidget.setLayout(searchLayout)
@@ -326,19 +322,14 @@ class BookSearch(QGroupBox):
         itemSUM = QTableWidgetItem(str(val[5]))
         itemSUM.setTextAlignment(Qt.AlignCenter)
 
-        itemModify = QToolButton(self.table)
-        itemModify.setFixedSize(75, 25)
-        itemModify.setText('修改')
-        itemModify.clicked.connect(lambda: self.updateBookFunction(val[0]))
-        itemDelete = QToolButton(self.table)
-        itemDelete.setFixedSize(75, 25)
-        itemDelete.setText('删除')
-        itemDelete.clicked.connect(lambda: self.deleteBookFunction(val[0]))
+        itemBorrow = QToolButton(self.table)
+        itemBorrow.setFixedSize(75, 25)
+        itemBorrow.setText('借阅')
+        itemBorrow.clicked.connect(lambda: self.updateBorrowFunction(val[0]))
 
         itemLayout = QHBoxLayout()
         itemLayout.setContentsMargins(0, 0, 0, 0)
-        itemLayout.addWidget(itemModify)
-        itemLayout.addWidget(itemDelete)
+        itemLayout.addWidget(itemBorrow)
         itemWidget = QWidget()
         itemWidget.setLayout(itemLayout)
 
@@ -352,14 +343,11 @@ class BookSearch(QGroupBox):
 
         self.table.setCellWidget(1, 6, itemWidget)
 
-    def updateBookFunction(self, BID: str):
+    def updateBorrowFunction(self, BID: str):
         book_info = database.get_book_info(BID)
         if book_info is None:
             return
-        self.sum = book_info['BORROW_TIMES']
-        self.updateBookDialog = book_information.BookInfo(book_info)
-        self.updateBookDialog.after_close.connect(self.updateBook)
-        self.updateBookDialog.show()
+        database.borrow_book(book_info['ID'], self.SID)
 
     def updateBook(self, book_info: dict):
         change = self.sum - book_info['SUM']
@@ -372,26 +360,6 @@ class BookSearch(QGroupBox):
         ans = database.update_book(book_info)
         if ans:
             self.searchFunction()
-
-    def addNewBookFunction(self):
-        self.newBookDialog = book_information.BookInfo()
-        self.newBookDialog.show()
-        self.newBookDialog.after_close.connect(self.addNewBook)
-
-    def addNewBook(self, book_info: dict):
-        ans = database.new_book(book_info)
-        if ans:
-            self.searchFunction()
-
-    def deleteBookFunction(self, BID: str):
-        msgBox = QMessageBox(QMessageBox.Warning, "警告!", '您将会永久删除这本书以及相关信息!',
-                             QMessageBox.NoButton, self)
-        msgBox.addButton("确认", QMessageBox.AcceptRole)
-        msgBox.addButton("取消", QMessageBox.RejectRole)
-        if msgBox.exec_() == QMessageBox.AcceptRole:
-            ans = database.delete_book(BID)
-            if ans:
-                self.searchFunction()
 
     def initUI(self):
         self.setFixedSize(1100, 600)
