@@ -114,7 +114,7 @@ def init_database():
                                port=CONFIG['port'])
         cursor = conn.cursor()
         conn.autocommit(True)
-        cursor.execute('''DROP DATABASE library''')
+        cursor.execute('''DROP DATABASE IF EXISTS library''')
         cursor.execute('''CREATE DATABASE IF NOT EXISTS library''')
         conn.autocommit(False)
         cursor.execute('''
@@ -200,9 +200,9 @@ def init_database():
         VALUES('b3', '组成原理', 'zxh', 68.0, 0,5,2);
         ''')
         cursor.execute('''
-        INSERT
-        INTO reader(ID,name,email,pwd,headshot)
-        VALUES('r1', 'lihua', 'a@qq.com', 'r1', './headshot/r1.png');
+            INSERT
+            INTO reader(ID,name,email,pwd,headshot)
+            VALUES('r1', 'lihua', 'a@qq.com', 'r1', './headshot/r1.png');
         ''')
         
         cursor.execute('''

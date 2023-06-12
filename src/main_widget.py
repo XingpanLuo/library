@@ -23,7 +23,9 @@ class MainWindow(QWidget):
         self.login = login.Login()
         self.login.setParent(self)
         self.login.move(390, 120)
+        # 登录验证
         self.login.loginButton.clicked.connect(self.loginFunction)
+        # 进入注册界面
         self.login.signupButton.clicked.connect(self.signupViewFunction)
 
     # 创建注册菜单
@@ -109,4 +111,5 @@ class MainWindow(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = MainWindow()
+    ex.show()
     sys.exit(app.exec_())
