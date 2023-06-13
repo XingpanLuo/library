@@ -59,6 +59,7 @@ class readerInfo(QGroupBox):
 
         # 密码
         self.passwordInput = QLineEdit()
+        self.passwordInput.setEchoMode(QLineEdit.Password)
         self.passwordInput.setFixedSize(400, 40)
         self.passwordInput.setText('请输入密码')
         self.passwordInput.initText = '请输入密码'
@@ -68,6 +69,7 @@ class readerInfo(QGroupBox):
 
         # 重复密码
         self.repPasswordInput = QLineEdit()
+        self.repPasswordInput.setEchoMode(QLineEdit.Password)
         self.repPasswordInput.setFixedSize(400, 40)
         self.repPasswordInput.setText('请重复输入密码')
         self.repPasswordInput.initText = '请重复输入密码'

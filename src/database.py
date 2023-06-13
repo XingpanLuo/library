@@ -25,7 +25,7 @@ def check_user_info(info: dict) -> dict:
     if not info['SID'].isalnum():
         ans['reason'] = 'ID存在非法字符'
         return ans
-    if info['PWD'] != info['REPWD']:
+    if info['PASSWORD'] != info['REPASSWORD']:
         ans['reason'] = '两次输入密码不一致'
         return ans
     ans['res'] = 'seccuss'
@@ -243,11 +243,9 @@ def signup(user_message: dict) -> bool:
     传入以下格式的字典
     user_message{
         'SID': str,
-        'PWD': str,
+        'PASSWORD': str,
         'SNAME': str,
-        'DEPARTMENT': str,
-        'MAJOR': str,
-        'MAX': int
+        'EMAIL': str
     }
     '''
     res = True
@@ -262,18 +260,21 @@ def signup(user_message: dict) -> bool:
             '''
             SELECT *
             FROM reader
-            WHERE SID=%s
+            WHERE ID=%s
             ''', (user_message['SID']))
         if len(cursor.fetchall()) != 0:
             raise Exception('用户已存在!')
         cursor.execute(
             '''
         INSERT
-        INTO reader
-        VALUES(%s, %s, %s, %s, %s, %s)
-        ''', (user_message['SID'], user_message['PWD'], user_message['SNAME'],
-              user_message['DEPARTMENT'], user_message['MAJOR'],
-              str(user_message['MAX'])))
+        INTO reader (ID, name, email, pwd)
+        VALUES(%s, %s, %s, %s)
+        ''', (
+                user_message['SID'],
+                user_message['SNAME'],
+                user_message['EMAIL'],
+                user_message['PASSWORD'],
+            ))
         conn.commit()
     except Exception as e:
         print('Signup error!')

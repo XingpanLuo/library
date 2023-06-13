@@ -6,8 +6,9 @@ import os
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QGroupBox, QToolButton,
                              QSplitter, QVBoxLayout, QHBoxLayout, QLabel,
                              QTableWidget, QTableWidgetItem, QAbstractItemView,
-                             QLineEdit, QFileDialog, QMessageBox, QComboBox)
-from PyQt5.QtGui import QIcon, QFont
+                             QLineEdit, QFileDialog, QMessageBox, QComboBox,
+                             QApplication)
+from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt, QSize
 from src import database
 # from src import reader_information
@@ -420,6 +421,7 @@ class SelfInfo(QWidget):
 
         # 密码
         self.passwordInput = QLineEdit()
+        self.passwordInput.setEchoMode(QLineEdit.Password)
         self.passwordInput.setFixedSize(400, 40)
         self.passwordInput.setText('请输入密码')
         self.passwordInput.initText = '请输入密码'
@@ -429,6 +431,7 @@ class SelfInfo(QWidget):
 
         # 重复密码
         self.repPasswordInput = QLineEdit()
+        self.repPasswordInput.setEchoMode(QLineEdit.Password)
         self.repPasswordInput.setFixedSize(400, 40)
         self.repPasswordInput.setText('请重复输入密码')
         self.repPasswordInput.initText = '请重复输入密码'
@@ -479,7 +482,17 @@ class SelfInfo(QWidget):
             self.stu_info['PWD'] = database.encrypt(self.passwordInput.text())
         self.stu_info['NAME'] = self.nameInput.text()
         self.stu_info['EMAIL'] = self.emailInput.text()
-        database.update_reader(self.stu_info)
+
+        if database.update_reader(self.stu_info) is True:
+            msgBox = QMessageBox(QMessageBox.Information, "成功", '更新信息成功',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+        else:
+            msgBox = QMessageBox(QMessageBox.Warning, "错误", '更新信息失败',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
 
     def initUI(self):
         self.setFixedSize(900, 600)
