@@ -6,6 +6,7 @@ try:
     from src import db
 except:
     import db
+
 CONFIG = {
     "host": '127.0.0.1',
     "user": 'root',
@@ -62,7 +63,7 @@ def convert(val: list):
         return None
     val = val[0]
     # 如果是学生
-    if len(val) == 3:
+    if len(val) >= 3:
         ans = {
             'class': 'reader',
             'ID': remove_blank(val[0]),
@@ -204,19 +205,19 @@ def init_database():
             INTO reader(ID,name,email,pwd,headshot)
             VALUES('r1', 'lihua', 'a@qq.com', 'r1', './headshot/r1.png');
         ''')
-        
+
         cursor.execute('''
         INSERT
         INTO reader(ID,name,email,pwd,headshot)
         VALUES('r2', 'lilin', 'b@ustc.edu.cn', 'password', './headshot/r1.png');
         ''')
-        
+
         cursor.execute('''
         INSERT
         INTO borrow(reader_ID,book_ID,borrow_Date)
         VALUES('r1','b1','2023-5-8') 
         ''')
-        
+
         cursor.execute('''
         INSERT
         INTO borrow(reader_ID,book_ID,borrow_Date,return_Date)
@@ -376,8 +377,7 @@ def update_reader(user_message: dict) -> bool:
             SET NAME=%s, EMAIL=%s
             WHERE ID=%s
             ''',
-            (user_message['NAME'], user_message['email'],
-             user_message['ID']))
+            (user_message['NAME'], user_message['email'], user_message['ID']))
         conn.commit()
     except Exception as e:
         print('Update error!')
@@ -518,25 +518,24 @@ def get_borrow_list(ID: str, BID: bool = False) -> list:
                                db=CONFIG['db'])
         cursor = conn.cursor()
         if ID == '' or ID == 'ID':
-            cursor.execute(
-                '''
+            cursor.execute('''
                 SELECT *
                 FROM borrow_view;
-                '''
-            )
+                ''')
         elif BID:
             cursor.execute(
                 '''
                 SELECT *
                 FROM borrow_view
                 WHERE book_ID=%s
-                ''',(ID))
+                ''', (ID))
         else:
-            cursor.execute('''
+            cursor.execute(
+                '''
                 SELECT *
                 FROM borrow_view
                 WHERE reader_ID=%s
-            ''',(ID))
+            ''', (ID))
         res = cursor.fetchall()
         temp = []
         for i in res:
@@ -553,6 +552,7 @@ def get_borrow_list(ID: str, BID: bool = False) -> list:
         if conn:
             conn.close()
         return res
+
 
 # 获取学生的预约信息
 def get_reserve_list(ID: str, BID: bool = False) -> list:
@@ -564,25 +564,24 @@ def get_reserve_list(ID: str, BID: bool = False) -> list:
                                db=CONFIG['db'])
         cursor = conn.cursor()
         if ID == '' or ID == 'ID':
-            cursor.execute(
-                '''
+            cursor.execute('''
                 SELECT *
                 FROM reserve_view;
-                '''
-            )
+                ''')
         elif BID:
             cursor.execute(
                 '''
                 SELECT *
                 FROM reserve_view
                 WHERE book_ID=%s
-                ''',(ID))
+                ''', (ID))
         else:
-            cursor.execute('''
+            cursor.execute(
+                '''
                 SELECT *
                 FROM reserve_view
                 WHERE reader_ID=%s
-            ''',(ID))
+            ''', (ID))
         res = cursor.fetchall()
         temp = []
         for i in res:
@@ -600,6 +599,7 @@ def get_reserve_list(ID: str, BID: bool = False) -> list:
             conn.close()
         return res
 
+
 def get_violation_list(ID: str, BID: bool = False) -> list:
     try:
         conn = pymysql.connect(host=CONFIG['host'],
@@ -609,25 +609,24 @@ def get_violation_list(ID: str, BID: bool = False) -> list:
                                db=CONFIG['db'])
         cursor = conn.cursor()
         if ID == '' or ID == 'ID':
-            cursor.execute(
-                '''
+            cursor.execute('''
                 SELECT *
                 FROM violation_view;
-                '''
-            )
+                ''')
         elif BID:
             cursor.execute(
                 '''
                 SELECT *
                 FROM violation_view
                 WHERE book_ID=%s
-                ''',(ID))
+                ''', (ID))
         else:
-            cursor.execute('''
+            cursor.execute(
+                '''
                 SELECT *
                 FROM violation_view
                 WHERE reader_ID=%s
-            ''',(ID))
+            ''', (ID))
         res = cursor.fetchall()
         temp = []
         for i in res:
@@ -644,6 +643,7 @@ def get_violation_list(ID: str, BID: bool = False) -> list:
         if conn:
             conn.close()
         return res
+
 
 # 还书
 def return_book(BID: str, SID: str) -> bool:
@@ -812,13 +812,10 @@ def new_book(book_info: dict) -> bool:
             raise Exception('书ID已存在!')
 
         # 插入新书
-        result_args = cursor.callproc('add_book', args=(
-            book_info['ID'],
-            book_info['NAME'],
-            book_info['AUTHOR'],
-            book_info['PRICE'],
-            0
-        ))
+        result_args = cursor.callproc('add_book',
+                                      args=(book_info['ID'], book_info['NAME'],
+                                            book_info['AUTHOR'],
+                                            book_info['PRICE'], 0))
         print(result_args)
         conn.commit()
     except Exception as e:
@@ -913,40 +910,43 @@ def update_book(book_info: dict) -> bool:
             conn.close()
         return res
 
+
 def delete_book(ID: str):
     try:
         res = True
-        conn = pymysql.connect(host=CONFIG['host'],
-                               user=CONFIG['user'],
-                               passwd=CONFIG['pwd'],
-                               port=CONFIG['port'],
-                               db=CONFIG['db'],
-                                )
+        conn = pymysql.connect(
+            host=CONFIG['host'],
+            user=CONFIG['user'],
+            passwd=CONFIG['pwd'],
+            port=CONFIG['port'],
+            db=CONFIG['db'],
+        )
         cursor = conn.cursor()
         # 执行存储过程
         print(ID)
-        cursor.callproc('delete_book', args=(ID,"",""))
+        cursor.callproc('delete_book', args=(ID, "", ""))
 
-        res=cursor.execute("SELECT @_delete_book_1, @_delete_book_2")
+        res = cursor.execute("SELECT @_delete_book_1, @_delete_book_2")
         print(res)
         result = cursor.fetchall()
-        
+
         result_bool = bool(result[0][0])
         result_str = str(result[0][1])
-        print(result_bool,result_str)
+        print(result_bool, result_str)
         # 根据存储过程的返回值来提交或回滚事务
         if not result:
             conn.rollback()
         else:
             conn.commit()
-        
-        return result_bool,result_str
+
+        return result_bool, result_str
     except:
         conn.rollback()
         raise
     finally:
         # 恢复自动提交
         conn.autocommit(True)
+
 
 # 搜索书籍
 def search_book(info: str, restrict: str, SID: str = '') -> list:
