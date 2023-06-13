@@ -26,3 +26,7 @@
 ## 提交4 by xyp
 
 1. database.py 判断 master 逻辑错误
+
+## 提交5 by xyp
+
+1. 完成 reader.py 的前两个 UI 编写
