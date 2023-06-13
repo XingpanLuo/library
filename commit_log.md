@@ -22,3 +22,7 @@
 1. 修改 database.py 的 search_book 逻辑
 
 （有事暂时离开，先只提交一点）
+
+## 提交4 by xyp
+
+1. database.py 判断 master 逻辑错误

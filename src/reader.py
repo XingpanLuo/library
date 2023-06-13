@@ -8,8 +8,8 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QGroupBox, QToolButton,
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, QSize
 from src import database
-# from src import reader_information
-from src import book_information
+from src import reader_information
+# from src import book_information
 # import database
 # import reader_information
 # import book_information
