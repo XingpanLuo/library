@@ -374,10 +374,10 @@ def update_reader(user_message: dict) -> bool:
         cursor.execute(
             '''
             UPDATE reader
-            SET NAME=%s, EMAIL=%s
+            SET name=%s, email=%s, pwd=%s
             WHERE ID=%s
-            ''',
-            (user_message['NAME'], user_message['email'], user_message['ID']))
+            ''', (user_message['NAME'], user_message['EMAIL'],
+                  user_message['PWD'], user_message['ID']))
         conn.commit()
     except Exception as e:
         print('Update error!')
