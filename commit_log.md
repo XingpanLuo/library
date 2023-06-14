@@ -35,3 +35,7 @@
 
 1. 完成读者全部 UI
 2. 修复 database.py 的 update_reader 的 bug
+
+## 提交7 by zcm
+1. 新建数据库的逻辑更新
+2. 更改database.py 中的一些sql语句使其符合本项目数据库设计（但不多）
