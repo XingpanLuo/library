@@ -492,15 +492,24 @@ class ReaderManage(QWidget):
         # 修改后刷新界面
         self.searchFunction()
 
-    def deletereaderFunction(self, BID: str):
+    def deletereaderFunction(self, rid: str):
         msgBox = QMessageBox(QMessageBox.Warning, "警告!", '您将会永久删除此读者以及相关信息!',
                              QMessageBox.NoButton, self)
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.addButton("取消", QMessageBox.RejectRole)
         if msgBox.exec_() == QMessageBox.AcceptRole:
-            ans = database.delete_reader(BID)
-            if ans:
-                self.searchFunction()
+            res = database.delete_reader(rid)
+            if res is True:
+                msgBox = QMessageBox(QMessageBox.Information, "成功", '已删除读者',
+                                     QMessageBox.NoButton, self)
+                msgBox.addButton("确认", QMessageBox.AcceptRole)
+                msgBox.exec_()
+            else:
+                msgBox = QMessageBox(QMessageBox.Warning, "错误", '删除读者失败，请检查读者是否有未归还的图书',
+                                     QMessageBox.NoButton, self)
+                msgBox.addButton("确认", QMessageBox.AcceptRole)
+                msgBox.exec_()
+            self.searchFunction()
 
     def initUI(self):
         self.setFixedSize(900, 600)

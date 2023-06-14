@@ -3,6 +3,7 @@ import datetime
 import pymysql
 import pymysql.cursors
 import random
+
 try:
     from src import db
 except:
@@ -490,28 +491,31 @@ def delete_reader(rid: str) -> bool:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
-        # 先强制把书还掉
+        # 先强制把书还掉 new检测是否有在借的书（如果有则不允许删除）
         cursor.execute(
             '''
-            SELECT reader_ID
-            FROM borrow
-            WHERE reader_ID=%s
-        ''', (rid))
-        BID_list = cursor.fetchall()
-        print(BID_list)
-        for BID in BID_list:
-            return_book(BID, rid)
+          SELECT book_ID
+           FROM borrow
+            WHERE reader_ID=%s and return_Date is NULL
+        ''', rid)
+        bid_list = cursor.fetchall()
+        print(rid)
+        print(bid_list)
+        if len(bid_list) != 0:
+            print(bid_list)
+            print("有未归还的书")
+            res = False
+        # for bid in bid_list:
+        #    return_book(bid, rid)
         # 再删除学生信息
-        cursor.execute(
-            '''
-            DELETE *
-            FROM reader
-            WHERE reader_ID=%s
-            DELETE *
-            FROM log
-            WHERE reader_ID=%s
-            ''', (rid, rid))
-        conn.commit()
+        else:
+            cursor.execute(
+                '''
+                DELETE
+                FROM reader
+                WHERE ID=%s;
+                ''', rid)
+            conn.commit()
     except Exception as e:
         print('delete book error!')
         print(e)
@@ -542,14 +546,14 @@ def get_borrow_list(ID: str, BID: bool = False) -> list:
                 SELECT *
                 FROM borrow_view
                 WHERE book_ID=%s
-                ''', (ID))
+                ''', ID)
         else:
             cursor.execute(
                 '''
                 SELECT *
                 FROM borrow_view
                 WHERE reader_ID=%s
-            ''', (ID))
+            ''', ID)
         res = cursor.fetchall()
         temp = []
         for i in res:
@@ -687,7 +691,7 @@ def return_book(bid: str, rid: str) -> bool:
         BACK_DATE = time.strftime("%Y-%m-%d-%H:%M")
 
         # book表内NUM加一，删除borrowing_book表内的记录，把记录插入log表
-        #new 更新借阅表中的记录，删除违期表中的记录
+        # new 更新借阅表中的记录，删除违期表中的记录
         cursor.execute(
             '''
         UPDATE borrow
@@ -697,7 +701,7 @@ def return_book(bid: str, rid: str) -> bool:
         FROM violation
         WHERE reader_ID=%s AND book_ID=%s
         ''',
-            (BACK_DATE,rid, bid,rid,bid))
+            (BACK_DATE, rid, bid, rid, bid))
         conn.commit()
     except Exception as e:
         print('Return error!')
@@ -765,7 +769,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                 FROM log, book
                 WHERE log.BID=%s AND book.BID=log.BID
                 ORDER BY BACK_DATE
-            ''', (ID, ))
+            ''', (ID,))
         else:
             cursor.execute(
                 '''
@@ -773,7 +777,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                 FROM log, book
                 WHERE SID=%s AND book.BID=log.BID
                 ORDER BY BACK_DATE
-            ''', (ID, ))
+            ''', (ID,))
         res = cursor.fetchall()
     except Exception as e:
         print('get log error!')
