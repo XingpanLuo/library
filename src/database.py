@@ -352,7 +352,7 @@ def signin(user_message: dict) -> dict:
 
 
 # 更新学生信息 新增
-def update_reader(user_message: dict,state) -> bool:
+def update_reader(user_message: dict, state) -> bool:
     '''
     传入字典格式如下
     user_message{

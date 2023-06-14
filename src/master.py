@@ -9,14 +9,17 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QGridLayout, QGroupBox,
                              QMessageBox, QComboBox)
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, QSize
+
 try:
     import database
     import book_information
     import reader_information
+    import reader
 except:
     from src import database
     from src import book_information
     from src import reader_information
+
 
 class AdministratorPage(QWidget):
 
@@ -114,7 +117,7 @@ class AdministratorPage(QWidget):
             lambda: self.switch(4, self.borrowManage))
         self.borrowManage.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.btnList = [
-            self.bookManage, self.userManage, self.reserveManage, self.borrowManage,self.violationManage
+            self.bookManage, self.userManage, self.reserveManage, self.borrowManage, self.violationManage
         ]
 
         self.layout = QVBoxLayout()
@@ -147,14 +150,15 @@ class AdministratorPage(QWidget):
             self.content = ReaderManage()
         elif self.focus == 2:
             self.content = ReserveManage()
-        elif self.focus==3:
+        elif self.focus == 3:
             self.content = BorrowManage()
         else:
-            self.content= ViolationManage()
+            self.content = ViolationManage()
         self.body.addWidget(self.content)
 
     def setMyStyle(self):
         pass
+
 
 class BookManage(QGroupBox):
 
@@ -207,7 +211,7 @@ class BookManage(QGroupBox):
 
     # 搜索方法
     def searchFunction(self):
-        convert = {'书号': 'ID','作者': 'AUTHOR', '书名': 'NAME'}
+        convert = {'书号': 'ID', '作者': 'AUTHOR', '书名': 'NAME'}
         self.book_list = database.search_book(self.searchInput.text(), convert[self.selectBox.currentText()])
         if self.book_list == []:
             print('未找到')
@@ -264,7 +268,7 @@ class BookManage(QGroupBox):
         itemSUM = QTableWidgetItem(str(val[5]))
         itemSUM.setTextAlignment(Qt.AlignCenter)
 
-        itemRESERVE=QTableWidgetItem(str(val[6]))
+        itemRESERVE = QTableWidgetItem(str(val[6]))
         itemRESERVE.setTextAlignment(Qt.AlignCenter)
 
         itemModify = QToolButton(self.table)
@@ -290,7 +294,7 @@ class BookManage(QGroupBox):
         self.table.setItem(1, 3, itemPRICE)
         self.table.setItem(1, 4, itemSTATUS)
         self.table.setItem(1, 5, itemSUM)
-        self.table.setItem(1,6,itemRESERVE)
+        self.table.setItem(1, 6, itemRESERVE)
 
         self.table.setCellWidget(1, 7, itemWidget)
 
@@ -333,7 +337,7 @@ class BookManage(QGroupBox):
 
     def initUI(self):
         self.setFixedSize(1100, 600)
-        
+
     def errorBox(self, mes: str):
         msgBox = QMessageBox(
             QMessageBox.Warning,
@@ -344,6 +348,7 @@ class BookManage(QGroupBox):
         )
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.exec_()
+
 
 class ReaderManage(QWidget):
 
@@ -459,17 +464,33 @@ class ReaderManage(QWidget):
         self.table.setCellWidget(1, 3, itemWidget)
 
     def updatereaderFunction(self, ID: str):
+        print(ID)
         stu_info = database.get_reader_info(ID)
+        # print(stu_info)
+
         if stu_info is None:
             return
         self.updatereaderDialog = reader_information.readerInfo(stu_info)
+        # 这里将关闭窗口时的信息传递到updatereader中
         self.updatereaderDialog.after_close.connect(self.updatereader)
         self.updatereaderDialog.show()
 
     def updatereader(self, stu_info: dict):
-        ans = database.update_reader(stu_info)
-        if ans:
-            self.searchFunction()
+        print(stu_info)
+        update_state = 'PWD' in stu_info.keys()
+        print(update_state)
+        if database.update_reader(stu_info, update_state) is True:
+            msgBox = QMessageBox(QMessageBox.Information, "成功", '更新信息成功',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+        else:
+            msgBox = QMessageBox(QMessageBox.Warning, "错误", '更新信息失败',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+        # 修改后刷新界面
+        self.searchFunction()
 
     def deletereaderFunction(self, BID: str):
         msgBox = QMessageBox(QMessageBox.Warning, "警告!", '您将会永久删除此读者以及相关信息!',
@@ -484,6 +505,7 @@ class ReaderManage(QWidget):
     def initUI(self):
         self.setFixedSize(900, 600)
 
+
 class BorrowManage(QWidget):
 
     def __init__(self):
@@ -491,7 +513,7 @@ class BorrowManage(QWidget):
         self.body = QVBoxLayout()
         self.borrow_list = []
         self.table = None
-        #self.setTitleBar()
+        # self.setTitleBar()
         self.setSearchBar()
         self.searchFunction()
 
@@ -555,7 +577,7 @@ class BorrowManage(QWidget):
             self.SID = self.searchInput.text()
         if self.borrow_list == []:
             print('未找到')
-            msgbox=QMessageBox()
+            msgbox = QMessageBox()
             msgbox.setText("未找到")
             msgbox.setIcon(QMessageBox.Warning)
             msgbox.exec()
@@ -597,11 +619,11 @@ class BorrowManage(QWidget):
         print(val)
         itemRID = QTableWidgetItem(val[0])
         itemRID.setTextAlignment(Qt.AlignCenter)
-        itemRName=QTableWidgetItem(val[1])
+        itemRName = QTableWidgetItem(val[1])
         itemRName.setTextAlignment(Qt.AlignCenter)
         itemBID = QTableWidgetItem(val[2])
         itemBID.setTextAlignment(Qt.AlignCenter)
-        itemBName=QTableWidgetItem(val[3])
+        itemBName = QTableWidgetItem(val[3])
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
@@ -639,6 +661,7 @@ class BorrowManage(QWidget):
     def initUI(self):
         self.setFixedSize(1000, 600)
 
+
 class ReserveManage(QWidget):
 
     def __init__(self):
@@ -646,7 +669,7 @@ class ReserveManage(QWidget):
         self.body = QVBoxLayout()
         self.reserve_list = []
         self.table = None
-        #self.setTitleBar()
+        # self.setTitleBar()
         self.setSearchBar()
         self.searchFunction()
 
@@ -748,11 +771,11 @@ class ReserveManage(QWidget):
         print(val)
         itemRID = QTableWidgetItem(val[0])
         itemRID.setTextAlignment(Qt.AlignCenter)
-        itemRName=QTableWidgetItem(val[1])
+        itemRName = QTableWidgetItem(val[1])
         itemRName.setTextAlignment(Qt.AlignCenter)
         itemBID = QTableWidgetItem(val[2])
         itemBID.setTextAlignment(Qt.AlignCenter)
-        itemBName=QTableWidgetItem(val[3])
+        itemBName = QTableWidgetItem(val[3])
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
@@ -790,6 +813,7 @@ class ReserveManage(QWidget):
     def initUI(self):
         self.setFixedSize(1000, 600)
 
+
 class ViolationManage(QWidget):
 
     def __init__(self):
@@ -797,7 +821,7 @@ class ViolationManage(QWidget):
         self.body = QVBoxLayout()
         self.reserve_list = []
         self.table = None
-        #self.setTitleBar()
+        # self.setTitleBar()
         self.setSearchBar()
         self.searchFunction()
 
@@ -898,11 +922,11 @@ class ViolationManage(QWidget):
         print(val)
         itemRID = QTableWidgetItem(val[0])
         itemRID.setTextAlignment(Qt.AlignCenter)
-        itemRName=QTableWidgetItem(val[1])
+        itemRName = QTableWidgetItem(val[1])
         itemRName.setTextAlignment(Qt.AlignCenter)
         itemBID = QTableWidgetItem(val[2])
         itemBID.setTextAlignment(Qt.AlignCenter)
-        itemBName=QTableWidgetItem(val[3])
+        itemBName = QTableWidgetItem(val[3])
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
@@ -933,6 +957,7 @@ class ViolationManage(QWidget):
 
     def initUI(self):
         self.setFixedSize(1000, 600)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

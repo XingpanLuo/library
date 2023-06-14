@@ -43,3 +43,6 @@
 ## 提交8 by zcm
 1. database，py的update_reader新增参数state，为1则更新密码，为0则不更新
 2. 由1，更新reader.py中修改个人信息的相关部分
+
+## 提交9 by zcm
+1. 管理员界面的学生信息更新功能完成
