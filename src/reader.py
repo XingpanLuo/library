@@ -6,8 +6,7 @@ import os
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QGroupBox, QToolButton,
                              QSplitter, QVBoxLayout, QHBoxLayout, QLabel,
                              QTableWidget, QTableWidgetItem, QAbstractItemView,
-                             QLineEdit, QFileDialog, QMessageBox, QComboBox,
-                             QApplication)
+                             QLineEdit, QFileDialog, QMessageBox, QComboBox)
 from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt, QSize
 from src import database
@@ -102,13 +101,26 @@ class readerPage(QWidget):
             lambda: self.switch(2, self.readerInfo))
         self.readerInfo.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
-        self.btnList = [self.bookManage, self.borrowManage, self.readerInfo]
+        # 借阅日志
+        self.refreshInfo = QToolButton()
+        self.refreshInfo.setText('刷新信息')
+        self.refreshInfo.setFixedSize(160, 50)
+        self.refreshInfo.setIcon(QIcon('icon/history.png'))
+        self.refreshInfo.setIconSize(QSize(30, 30))
+        self.refreshInfo.clicked.connect(
+            lambda: self.switch(3, self.refreshInfo))
+        self.refreshInfo.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+
+        self.btnList = [
+            self.bookManage, self.borrowManage, self.readerInfo,
+            self.refreshInfo
+        ]
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.bookManage)
         self.layout.addWidget(self.borrowManage)
         self.layout.addWidget(self.readerInfo)
-        self.layout.addWidget(self.borrowManage)
+        self.layout.addWidget(self.refreshInfo)
         self.layout.addStretch()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
@@ -125,14 +137,23 @@ class readerPage(QWidget):
 
     # 设置右侧信息页
     def setContent(self):
+        pages = [
+            BookSearch(self.info['ID']),
+            ReaderBorrowHistory(self.info['ID']),
+            SelfInfo(self.info['ID'])
+        ]
         if self.content is not None:
             self.content.deleteLater()
         if self.focus == 0:
-            self.content = BookSearch(self.info['ID'])
+            self.content = pages[0]
         elif self.focus == 1:
-            self.content = ReaderBorrowHistory(self.info['ID'])
+            self.content = pages[1]
         elif self.focus == 2:
-            self.content = SelfInfo(self.info['ID'])
+            self.content = pages[2]
+        elif self.focus == 3:
+            self.content = pages[1]
+            # pages[1] = ReaderBorrowHistory(self.info['ID'])
+            pages[2].refresh()
         self.body.addWidget(self.content)
 
     def setMyStyle(self):
@@ -240,6 +261,8 @@ class BookSearch(QGroupBox):
             status_str = "借出"
         elif val[4] == 2:
             status_str = "借出且被预约"
+        elif val[4] == 3:
+            status_str = "在馆且被预约"
         itemSTATUS = QTableWidgetItem(status_str)
         itemSTATUS.setTextAlignment(Qt.AlignCenter)
 
@@ -376,8 +399,17 @@ class SelfInfo(QWidget):
 
     def __init__(self, SID: str):
         super().__init__()
-        self.stu_info = database.get_reader_info(SID)
+        self.SID = SID
+        self.bodyLayout = QVBoxLayout()
+        self.show_page()
+        self.setLayout(self.bodyLayout)
+        self.initUI()
 
+    def refresh(self):
+        self.show_page()
+
+    def show_page(self):
+        self.stu_info = database.get_reader_info(self.SID)
         self.title = QLabel()
         self.title.setText('学生信息')
 
@@ -389,6 +421,9 @@ class SelfInfo(QWidget):
 
         self.email = QLabel()
         self.email.setText('邮箱')
+
+        self.headname = QLabel()
+        self.headname.setText('头像')
 
         self.pwd = QLabel()
         self.pwd.setText('密码')
@@ -419,6 +454,21 @@ class SelfInfo(QWidget):
         self.emailInput.mousePressEvent = lambda x: self.inputClick(self.
                                                                     emailInput)
 
+        # 头像
+        self.headInput = QLineEdit()
+        self.headInput.setFixedSize(400, 40)
+        self.headInput.setText(str(self.stu_info['headshot']))
+        self.headInput.initText = '请输入头像路径'
+        self.headInput.setTextMargins(5, 5, 5, 5)
+        self.headInput.mousePressEvent = lambda x: self.inputClick(self.
+                                                                   headInput)
+
+        # 头像
+        self.headshot_ = QLabel(self)
+        self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
+        self.headshot_.setPixmap(self.headshot)
+        self.headshot_.resize(200, 200)
+
         # 密码
         self.passwordInput = QLineEdit()
         self.passwordInput.setEchoMode(QLineEdit.Password)
@@ -446,23 +496,21 @@ class SelfInfo(QWidget):
         self.submit.clicked.connect(self.submitFunction)
 
         self.btnList = [
-            self.SIDInput, self.nameInput, self.emailInput, self.passwordInput,
-            self.repPasswordInput
+            self.SIDInput, self.nameInput, self.emailInput, self.headInput,
+            self.passwordInput, self.repPasswordInput
         ]
 
         self.lableList = [
-            self.rid, self.rname, self.email, self.pwd, self.repwd
+            self.rid, self.rname, self.email, self.headname, self.pwd,
+            self.repwd
         ]
 
-        self.bodyLayout = QVBoxLayout()
+        self.bodyLayout.addWidget(self.headshot_)
         self.bodyLayout.addWidget(self.title)
         for i in range(0, len(self.btnList)):
             self.bodyLayout.addWidget(self.lableList[i])
             self.bodyLayout.addWidget(self.btnList[i])
         self.bodyLayout.addWidget(self.submit)
-
-        self.setLayout(self.bodyLayout)
-        self.initUI()
 
     def inputClick(self, e):
         for item in self.btnList:
@@ -473,6 +521,12 @@ class SelfInfo(QWidget):
 
     def submitFunction(self):
         submit_state = 0
+        if os.path.exists(self.headInput.text()) is False:
+            msgBox = QMessageBox(QMessageBox.Warning, "错误!", '头像文件不存在!',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+            return
         if self.passwordInput.text() != self.passwordInput.initText:
             submit_state = 1
             if self.passwordInput.text() != self.repPasswordInput.text():
@@ -484,8 +538,9 @@ class SelfInfo(QWidget):
             self.stu_info['PWD'] = database.encrypt(self.passwordInput.text())
         self.stu_info['NAME'] = self.nameInput.text()
         self.stu_info['EMAIL'] = self.emailInput.text()
+        self.stu_info['headshot'] = self.headInput.text()
 
-        if database.update_reader(self.stu_info,submit_state) is True:
+        if database.update_reader(self.stu_info, submit_state) is True:
             msgBox = QMessageBox(QMessageBox.Information, "成功", '更新信息成功',
                                  QMessageBox.NoButton, self)
             msgBox.addButton("确认", QMessageBox.AcceptRole)

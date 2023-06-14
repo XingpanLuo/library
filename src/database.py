@@ -70,7 +70,8 @@ def convert(val: list):
             'class': 'reader',
             'ID': remove_blank(val[0]),
             'NAME': remove_blank(val[1]),
-            'EMAIL': remove_blank(val[2])
+            'EMAIL': remove_blank(val[2]),
+            'headshot': remove_blank(val[3])
         }
     else:
         ans = {'class': 'master', 'ID': remove_blank(val[0])}
@@ -129,7 +130,7 @@ def init_database():
             name varchar(10),
             email varchar(30),
             pwd char(64),
-            headshot varchar(255)
+            headshot varchar(255) default './headshot/default.jpg'
         );
         ''')
 
@@ -360,9 +361,8 @@ def update_reader(user_message: dict, state) -> bool:
         'ID': str,
         'NAME': str,
         'EMAIL': str,
-        'DEPARTMENT': str,
-        'MAJOR': str,
-        'MAX': int
+        'PWD': str,
+        'headshot': str
     }
     返回bool
     '''
@@ -379,19 +379,20 @@ def update_reader(user_message: dict, state) -> bool:
             cursor.execute(
                 '''
                 UPDATE reader
-                SET name=%s, email=%s, pwd=%s
+                SET name=%s, email=%s, pwd=%s, headshot=\"%s\"
                 WHERE ID=%s
                 ''', (user_message['NAME'], user_message['EMAIL'],
-                      user_message['PWD'], user_message['ID']))
+                      user_message['PWD'], user_message['headshot'],
+                      user_message['ID']))
             conn.commit()
         if state == 0:
             cursor.execute(
                 '''
                 UPDATE reader
-                SET name=%s, email=%s
+                SET name=%s, email=%s, headshot=\"%s\"
                 WHERE ID=%s
                 ''', (user_message['NAME'], user_message['EMAIL'],
-                      user_message['ID']))
+                      user_message['headshot'], user_message['ID']))
             conn.commit()
     except Exception as e:
         print('Update error!')
@@ -414,7 +415,7 @@ def get_reader_info(ID: str) -> dict:
         cursor = conn.cursor()
         cursor.execute(
             '''
-            SELECT ID, NAME, EMAIL
+            SELECT ID, NAME, EMAIL, headshot
             FROM reader
             WHERE ID=%s
             ''', (ID))
@@ -701,7 +702,7 @@ def return_book(bid: str, rid: str) -> bool:
         FROM violation
         WHERE reader_ID=%s AND book_ID=%s
         ''',
-            (BACK_DATE, rid, bid, rid, bid))
+            (BACK_DATE,rid, bid,rid,bid))
         conn.commit()
     except Exception as e:
         print('Return error!')
