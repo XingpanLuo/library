@@ -30,3 +30,8 @@
 ## 提交5 by xyp
 
 1. 完成 reader.py 的前两个 UI 编写
+
+## 提交6 by xyp
+
+1. 完成读者全部 UI
+2. 修复 database.py 的 update_reader 的 bug

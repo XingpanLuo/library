@@ -43,7 +43,7 @@ class Login(QWidget):
 
         # 注册按钮
         self.signupButton = QPushButton()
-        self.signupButton.setText('注 册')
+        self.signupButton.setText('注  册')
         self.signupButton.setFixedSize(100, 60)
 
         # 登录按钮

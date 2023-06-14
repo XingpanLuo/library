@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtWidgets import (
-    QApplication, QVBoxLayout, QLabel, QLineEdit, QToolButton, QGroupBox, QMessageBox)
+from PyQt5.QtWidgets import (QApplication, QVBoxLayout, QLabel, QLineEdit,
+                             QToolButton, QGroupBox, QMessageBox)
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QIcon
 try:
@@ -19,19 +19,19 @@ class readerInfo(QGroupBox):
         self.title = QLabel()
         self.title.setText('学生信息')
 
-        self.rid=QLabel()
+        self.rid = QLabel()
         self.rid.setText('学号')
-        
-        self.rname=QLabel()
+
+        self.rname = QLabel()
         self.rname.setText('姓名')
-        
-        self.email=QLabel()
+
+        self.email = QLabel()
         self.email.setText('邮箱')
-        
-        self.pwd=QLabel()
+
+        self.pwd = QLabel()
         self.pwd.setText('密码')
-        
-        self.repwd=QLabel()
+
+        self.repwd = QLabel()
         self.repwd.setText('重复密码')
         # 学号输入框
         self.SIDInput = QLineEdit()
@@ -46,30 +46,36 @@ class readerInfo(QGroupBox):
         self.nameInput.setText(self.stu_info['NAME'])
         self.nameInput.initText = '请输入姓名'
         self.nameInput.setTextMargins(5, 5, 5, 5)
-        self.nameInput.mousePressEvent = lambda x: self.inputClick(self.nameInput)
+        self.nameInput.mousePressEvent = lambda x: self.inputClick(self.
+                                                                   nameInput)
         # 邮箱
         self.emailInput = QLineEdit()
         self.emailInput.setFixedSize(400, 40)
         self.emailInput.setText(str(self.stu_info['EMAIL']))
         self.emailInput.initText = '请输入邮箱'
         self.emailInput.setTextMargins(5, 5, 5, 5)
-        self.emailInput.mousePressEvent = lambda x: self.inputClick(self.emailInput)
+        self.emailInput.mousePressEvent = lambda x: self.inputClick(self.
+                                                                    emailInput)
 
         # 密码
         self.passwordInput = QLineEdit()
+        self.passwordInput.setEchoMode(QLineEdit.Password)
         self.passwordInput.setFixedSize(400, 40)
         self.passwordInput.setText('请输入密码')
         self.passwordInput.initText = '请输入密码'
         self.passwordInput.setTextMargins(5, 5, 5, 5)
-        self.passwordInput.mousePressEvent = lambda x: self.inputClick(self.passwordInput)
+        self.passwordInput.mousePressEvent = lambda x: self.inputClick(
+            self.passwordInput)
 
         # 重复密码
         self.repPasswordInput = QLineEdit()
+        self.repPasswordInput.setEchoMode(QLineEdit.Password)
         self.repPasswordInput.setFixedSize(400, 40)
         self.repPasswordInput.setText('请重复输入密码')
         self.repPasswordInput.initText = '请重复输入密码'
         self.repPasswordInput.setTextMargins(5, 5, 5, 5)
-        self.repPasswordInput.mousePressEvent = lambda x: self.inputClick(self.repPasswordInput)
+        self.repPasswordInput.mousePressEvent = lambda x: self.inputClick(
+            self.repPasswordInput)
 
         # 提交
         self.submit = QToolButton()
@@ -84,24 +90,17 @@ class readerInfo(QGroupBox):
         self.back.clicked.connect(self.close)
 
         self.btnList = [
-            self.SIDInput,
-            self.nameInput,
-            self.emailInput,
-            self.passwordInput,
+            self.SIDInput, self.nameInput, self.emailInput, self.passwordInput,
             self.repPasswordInput
         ]
-        
-        self.lableList=[
-            self.rid,
-            self.rname,
-            self.email,
-            self.pwd,
-            self.repwd
+
+        self.lableList = [
+            self.rid, self.rname, self.email, self.pwd, self.repwd
         ]
 
         self.bodyLayout = QVBoxLayout()
         self.bodyLayout.addWidget(self.title)
-        for i in range(0,len(self.btnList)):
+        for i in range(0, len(self.btnList)):
             self.bodyLayout.addWidget(self.lableList[i])
             self.bodyLayout.addWidget(self.btnList[i])
         self.bodyLayout.addWidget(self.submit)
@@ -120,7 +119,8 @@ class readerInfo(QGroupBox):
     def submitFunction(self):
         if self.passwordInput.text() != self.passwordInput.initText:
             if self.passwordInput.text() != self.repPasswordInput.text():
-                msgBox = QMessageBox(QMessageBox.Warning, "错误!", '两次输入密码不一致!', QMessageBox.NoButton, self)
+                msgBox = QMessageBox(QMessageBox.Warning, "错误!", '两次输入密码不一致!',
+                                     QMessageBox.NoButton, self)
                 msgBox.addButton("确认", QMessageBox.AcceptRole)
                 msgBox.exec_()
                 return
@@ -140,7 +140,7 @@ if __name__ == '__main__':
         'ID': '201602',
         'NAME': '小王',
         'EMAIL': 'b@mail.ustc.edu.cn',
-        'PWD':'123456'
+        'PWD': '123456'
     }
     app = QApplication(sys.argv)
     ex = readerInfo(stu_msg)

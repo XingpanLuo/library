@@ -62,23 +62,26 @@ class MainWindow(QWidget):
         获取信息后先检查
         加密密码
         '''
-        # self.user = self.signup.getInfo()
-        # res = database.check_user_info(self.user)
-        # if res['res'] == 'fail':
-        #     self.errorBox(res['reason'])
-        #     return
+        self.user = self.signup.getInfo()
+        print(self.user)
+        res = database.check_user_info(self.user)
+        if res['res'] == 'fail':
+            self.errorBox(res['reason'])
+            return
         # self.user['MAX'] = int(self.user['MAX'])
-        # self.user['PWD'] = database.encrypt(self.user['PWD'])
+        # 看起来并没有设置这个
+        self.user['PASSWORD'] = database.encrypt(self.user['PASSWORD'])
 
-        # ans = database.signup(self.user)
-        # self.user['class'] = 'stu'
-        # self.user.pop('PWD')
-        # if ans:
-        #     self.signup.setVisible(False)
-        #     print('成功')
-        #     self.display()
-        # else:
-        #     self.errorBox('注册失败')
+        ans = database.signup(self.user)
+        self.user['class'] = 'stu'
+        self.user['ID'] = self.user['SID']
+        self.user.pop('PASSWORD')
+        if ans:
+            self.signup.setVisible(False)
+            print('成功')
+            self.display()
+        else:
+            self.errorBox('注册失败')
 
     def backToLogin(self):
         self.signup.setVisible(False)
