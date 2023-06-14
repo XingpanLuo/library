@@ -472,7 +472,9 @@ class SelfInfo(QWidget):
             e.setText('')
 
     def submitFunction(self):
+        submit_state = 0
         if self.passwordInput.text() != self.passwordInput.initText:
+            submit_state = 1
             if self.passwordInput.text() != self.repPasswordInput.text():
                 msgBox = QMessageBox(QMessageBox.Warning, "错误!", '两次输入密码不一致!',
                                      QMessageBox.NoButton, self)
@@ -483,7 +485,7 @@ class SelfInfo(QWidget):
         self.stu_info['NAME'] = self.nameInput.text()
         self.stu_info['EMAIL'] = self.emailInput.text()
 
-        if database.update_reader(self.stu_info) is True:
+        if database.update_reader(self.stu_info,submit_state) is True:
             msgBox = QMessageBox(QMessageBox.Information, "成功", '更新信息成功',
                                  QMessageBox.NoButton, self)
             msgBox.addButton("确认", QMessageBox.AcceptRole)

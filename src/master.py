@@ -555,6 +555,10 @@ class BorrowManage(QWidget):
             self.SID = self.searchInput.text()
         if self.borrow_list == []:
             print('未找到')
+            msgbox=QMessageBox()
+            msgbox.setText("未找到")
+            msgbox.setIcon(QMessageBox.Warning)
+            msgbox.exec()
         if self.table is not None:
             self.table.deleteLater()
         self.setTable()

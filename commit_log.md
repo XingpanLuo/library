@@ -39,3 +39,7 @@
 ## 提交7 by zcm
 1. 新建数据库的逻辑更新
 2. 更改database.py 中的一些sql语句使其符合本项目数据库设计（但不多）
+
+## 提交8 by zcm
+1. database，py的update_reader新增参数state，为1则更新密码，为0则不更新
+2. 由1，更新reader.py中修改个人信息的相关部分

@@ -1,4 +1,5 @@
 import time
+import datetime
 import pymysql
 import pymysql.cursors
 import random
@@ -350,8 +351,8 @@ def signin(user_message: dict) -> dict:
             return None
 
 
-# 更新学生信息
-def update_reader(user_message: dict) -> bool:
+# 更新学生信息 新增
+def update_reader(user_message: dict,state) -> bool:
     '''
     传入字典格式如下
     user_message{
@@ -372,14 +373,25 @@ def update_reader(user_message: dict) -> bool:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
-        cursor.execute(
-            '''
-            UPDATE reader
-            SET name=%s, email=%s, pwd=%s
-            WHERE ID=%s
-            ''', (user_message['NAME'], user_message['EMAIL'],
-                  user_message['PWD'], user_message['ID']))
-        conn.commit()
+        print(user_message)
+        if state == 1:
+            cursor.execute(
+                '''
+                UPDATE reader
+                SET name=%s, email=%s, pwd=%s
+                WHERE ID=%s
+                ''', (user_message['NAME'], user_message['EMAIL'],
+                      user_message['PWD'], user_message['ID']))
+            conn.commit()
+        if state == 0:
+            cursor.execute(
+                '''
+                UPDATE reader
+                SET name=%s, email=%s
+                WHERE ID=%s
+                ''', (user_message['NAME'], user_message['EMAIL'],
+                      user_message['ID']))
+            conn.commit()
     except Exception as e:
         print('Update error!')
         print(e)
@@ -463,7 +475,7 @@ def search_reader(info: str) -> list:
 
 
 # 删除学生信息
-def delete_reader(SID: str) -> bool:
+def delete_reader(rid: str) -> bool:
     '''
     传入SID
     删除reader表内记录,
@@ -481,23 +493,24 @@ def delete_reader(SID: str) -> bool:
         # 先强制把书还掉
         cursor.execute(
             '''
-            SELECT BID
-            FROM borrowing_book
-            WHERE SID=%s
-        ''', (SID))
+            SELECT reader_ID
+            FROM borrow
+            WHERE reader_ID=%s
+        ''', (rid))
         BID_list = cursor.fetchall()
+        print(BID_list)
         for BID in BID_list:
-            return_book(BID, SID)
+            return_book(BID, rid)
         # 再删除学生信息
         cursor.execute(
             '''
-            DELETE
+            DELETE *
             FROM reader
-            WHERE SID=%s
-            DELETE
+            WHERE reader_ID=%s
+            DELETE *
             FROM log
-            WHERE SID=%s
-            ''', (SID, SID))
+            WHERE reader_ID=%s
+            ''', (rid, rid))
         conn.commit()
     except Exception as e:
         print('delete book error!')
@@ -647,7 +660,7 @@ def get_violation_list(ID: str, BID: bool = False) -> list:
 
 
 # 还书
-def return_book(BID: str, SID: str) -> bool:
+def return_book(bid: str, rid: str) -> bool:
     '''
     传入BID, SID，删除borrowing_book表内的记录在log表内新建记录
     返回bool型
@@ -661,32 +674,30 @@ def return_book(BID: str, SID: str) -> bool:
                                db=CONFIG['db'])
         cursor = conn.cursor()
         # 先把借书日期，书本剩余数量，罚金等信息找出
+        # new仅找出借书日期，假定每本书仅一本
         cursor.execute(
             '''
-        SELECT BORROW_DATE, NUM, PUNISH
-        FROM book, borrowing_book
-        WHERE SID=%s AND borrowing_book.BID=%s AND borrowing_book.BID=book.BID
-        ''', (SID, BID))
+        SELECT BORROW_DATE
+        FROM book, borrow
+        WHERE reader_ID=%s AND borrow.book_ID=%s AND borrow.book_ID=book.ID
+        ''', (rid, bid))
         book_mes = cursor.fetchall()
-        NUM = book_mes[0][1]
+        print(book_mes)
         BORROW_DATE = book_mes[0][0]
-        PUNISH = book_mes[0][2]
         BACK_DATE = time.strftime("%Y-%m-%d-%H:%M")
 
         # book表内NUM加一，删除borrowing_book表内的记录，把记录插入log表
+        #new 更新借阅表中的记录，删除违期表中的记录
         cursor.execute(
             '''
-        UPDATE book
-        SET NUM=%d
-        WHERE BID=%s
+        UPDATE borrow
+        SET return_Date=%s
+        WHERE reader_ID=%s AND book_ID=%s
         DELETE
-        FROM borrowing_book
-        WHERE SID=%s AND BID=%s
-        INSERT
-        INTO log
-        VALUES(%s, %s, %s, %s, %d)
+        FROM violation
+        WHERE reader_ID=%s AND book_ID=%s
         ''',
-            (NUM + 1, BID, SID, BID, BID, SID, BORROW_DATE, BACK_DATE, PUNISH))
+            (BACK_DATE,rid, bid,rid,bid))
         conn.commit()
     except Exception as e:
         print('Return error!')
@@ -716,7 +727,7 @@ def pay(BID: str, SID: str, PUNISH: int) -> bool:
         # book表内NUM加一，删除borrowing_book表内的记录，把记录插入log表
         cursor.execute(
             '''
-            UPDATE borrowing_book
+            UPDATE borrow
             SET DEADLINE=%s, PUNISH=%d
             WHERE BID=%s AND SID=%s
             ''', (postpone(time.strftime('%Y-%m-%d-%H:%M')), PUNISH, BID, SID))
