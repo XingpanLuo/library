@@ -1,4 +1,4 @@
-import sys
+# import sys
 # import time
 import os
 # import typing
@@ -554,9 +554,10 @@ class SelfInfo(QWidget):
             image_file, _ = QFileDialog.getOpenFileName(
                 self, 'Open file', './headshot',
                 'Image files (*.jpg *.gif *.png *.jpeg)')
-            if not image_file.startswith(sys.path[0]):
-                msgBox = QMessageBox(QMessageBox.Warning, "错误!", '头像文件必须在指定目录下!',
-                                     QMessageBox.NoButton, self)
+            if False:  # not image_file.startswith(os.getcwd()):# 看起来检测路径貌似并不容易
+                msgBox = QMessageBox(QMessageBox.Warning, "错误!",
+                                     '头像文件必须在指定目录下!', QMessageBox.NoButton,
+                                     self)
                 msgBox.addButton("确认", QMessageBox.AcceptRole)
                 msgBox.exec_()
                 continue
