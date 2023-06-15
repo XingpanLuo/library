@@ -719,6 +719,12 @@ def return_book(bid: str, rid: str) -> bool:
         FROM violation
         WHERE reader_ID=%s AND book_ID=%s
         ''', (rid, bid))
+        cursor.execute(
+            '''
+        UPDATE book
+        SET status=-3+3*status
+        WHERE ID=%s
+        ''', bid)
         conn.commit()
     except Exception as e:
         print('Return error!')

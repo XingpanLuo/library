@@ -273,7 +273,16 @@ class BookManage(QGroupBox):
         itemPRICE = QTableWidgetItem(str(val[3]))
         itemPRICE.setTextAlignment(Qt.AlignCenter)
 
-        itemSTATUS = QTableWidgetItem(str(val[4]))
+        status_str = ""
+        if val[4] == 0:
+            status_str = "可借"
+        elif val[4] == 1:
+            status_str = "借出"
+        elif val[4] == 2:
+            status_str = "借出且被预约"
+        elif val[4] == 3:
+            status_str = "在馆且被预约"
+        itemSTATUS = QTableWidgetItem(status_str)
         itemSTATUS.setTextAlignment(Qt.AlignCenter)
 
         itemSUM = QTableWidgetItem(str(val[5]))
