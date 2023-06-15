@@ -162,6 +162,7 @@ def db_init_table(cursor):
     );
     ''')
 
+def create_trigger(cursor):
     cursor.execute('''
     CREATE TRIGGER takedates AFTER INSERT
     ON reserve for each row

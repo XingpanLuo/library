@@ -146,6 +146,7 @@ def init_database():
         db.create_borrow_view(cursor)
         db.create_reserve_view(cursor)
         db.create_violation_view(cursor)
+        db.create_trigger(cursor)
         conn.commit()
     except Exception as e:
         # print('Init fall 如果数据库已经成功初始化则无视此条警告')
