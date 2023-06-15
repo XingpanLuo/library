@@ -41,7 +41,7 @@ INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r8','c','h@ustc.edu.cn
 INSERT INTO borrow(reader_ID, book_ID, borrow_Date)VALUES('r1', 'b1', '2023-2-9');
 INSERT INTO borrow(reader_ID, book_ID, borrow_Date, return_Date)VALUES('r2', 'b1', '2022-6-8', '2022-6-30');
 INSERT INTO borrow(reader_ID, book_ID, borrow_Date)VALUES('r2', 'b2', '2023-6-9');
-INSERT INTO borrow(reader_ID, book_ID, borrow_Date)VALUES('r2', 'b3', '2023-6-8', '2023-6-9');
+INSERT INTO borrow(reader_ID, book_ID, borrow_Date, return_Date)VALUES('r2', 'b3', '2023-6-8', '2023-6-9');
 INSERT INTO borrow(reader_ID, book_ID, borrow_Date)VALUES('r4', 'b4', '2023-6-10');
 -- # reserve;
 INSERT INTO reserve(reader_ID, book_ID, reserve_Date)VALUES('r3', 'b2', '2023-6-12');
