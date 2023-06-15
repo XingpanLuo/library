@@ -596,7 +596,7 @@ class SelfInfo(QWidget):
     def chooseHeadFile(self):
         # 实现chooseHeadFile方法，用于选择头像文件
         filePath, fileType = QFileDialog.getOpenFileName(
-            self, '选择文件', '.', 'Image files(*.png *.jpg *.jpeg *.bmp)')
+            self, '选择文件', './src', 'Image files(*.png *.jpg *.jpeg *.bmp)')
         self.headInput.setText(filePath)
         self.stu_info['headshot'] = filePath
         self.headInput.setText(str(self.stu_info['headshot']))
