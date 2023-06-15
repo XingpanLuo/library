@@ -4,9 +4,10 @@ import os
 # import typing
 # from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QGroupBox, QToolButton,
-                             QSplitter, QVBoxLayout, QHBoxLayout, QLabel,
-                             QTableWidget, QTableWidgetItem, QAbstractItemView,
-                             QLineEdit, QFileDialog, QMessageBox, QComboBox)
+                             QHeaderView, QSplitter, QVBoxLayout, QHBoxLayout,
+                             QLabel, QTableWidget, QTableWidgetItem,
+                             QAbstractItemView, QLineEdit, QFileDialog,
+                             QMessageBox, QComboBox)
 from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt, QSize
 from src import database
@@ -23,6 +24,14 @@ class readerPage(QWidget):
         super().__init__()
         self.info = info
         self.focus = 0
+        # 老赖提醒
+        is_tle = False if len(database.get_violation_list(
+            info['ID'])) == 0 else True
+        if is_tle is True:
+            msgBox = QMessageBox(QMessageBox.Warning, "错误!", '有书籍超期，请先还书再操作!',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
         self.initUI()
 
     def initUI(self):
@@ -176,6 +185,9 @@ class BookSearch(QGroupBox):
         self.body = QVBoxLayout()
         self.table = None
         self.SID = SID
+        # 检测是否有超期
+        self.is_tle = False if len(
+            database.get_violation_list(SID)) == 0 else True
         self.setSearchBar()
         self.searchFunction()
 
@@ -222,6 +234,8 @@ class BookSearch(QGroupBox):
     # 设置表格
     def setTable(self):
         self.table = QTableWidget(1, 7)
+        self.table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setVisible(False)
@@ -248,16 +262,15 @@ class BookSearch(QGroupBox):
 
     # 插入行
     def insertRow(self, val: list):
-        print(val)
-        borrowinfo = database.get_borrow_list(val[0], True)
-        # 权宜之计
-        if len(borrowinfo) > 0:
-            borrowinfo = borrowinfo[0]
-        print(borrowinfo)
-        # 是否被本人借阅
+        # 检测是否是本人借的或预约的
         is_rent_by_self = False
-        if len(borrowinfo) > 0 and borrowinfo[0] == self.SID:
-            is_rent_by_self = True
+        for _borrowinfo in database.get_borrow_list(val[0], True):
+            if _borrowinfo[0] == self.SID:
+                is_rent_by_self = True
+        is_reserve_by_self = False
+        for _reserveinfo in database.get_reserve_list(val[0], True):
+            if _reserveinfo[0] == self.SID:
+                is_reserve_by_self = True
 
         itemBID = QTableWidgetItem(val[0])
         itemBID.setTextAlignment(Qt.AlignCenter)
@@ -289,14 +302,17 @@ class BookSearch(QGroupBox):
         itemBorrow_exist = False
         itemBorrow = QToolButton(self.table)
         itemBorrow.setFixedSize(75, 25)
-        # 可借阅逻辑：书在馆无预约或有预约且预约者为本人
-        if val[4] == 0 or (val[4] == 3 and is_rent_by_self is True):
+        # 可借阅逻辑：不可违期，且书在馆无预约或有预约且预约者为本人
+        if (self.is_tle is False) and (val[4] == 0 or
+                                       (val[4] == 3
+                                        and is_reserve_by_self is True)):
             itemBorrow_exist = True
             itemBorrow.setText('借阅')
             itemBorrow.clicked.connect(
                 lambda: self.updateBorrowFunction(val[0]))
-        # 书可预约逻辑：书籍状态为1且不是本人借的
-        elif val[4] == 1 and (is_rent_by_self is False):
+        # 书可预约逻辑：不可违期书籍状态为1且不是本人借的
+        elif (self.is_tle is False) and (val[4] == 1 and
+                                         (is_rent_by_self is False)):
             itemBorrow_exist = True
             itemBorrow.setText('预约')
             itemBorrow.clicked.connect(
