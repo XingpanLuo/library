@@ -685,10 +685,6 @@ class BorrowManage(QWidget):
 
 
     def returnBook(self, SID: str, BID: str, isPunished: int):
-        if isPunished > 0:
-            database.pay(BID, SID, isPunished)
-        # print(SID)
-        # print(BID)
         database.return_book(BID, SID)
         # 刷新表格
         self.searchFunction('BID')

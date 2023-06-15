@@ -695,8 +695,6 @@ def return_book(bid: str, rid: str) -> bool:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
-        # 先把借书日期，书本剩余数量，罚金等信息找出
-        # new仅找出借书日期，假定每本书仅一本
         cursor.execute(
             '''
         SELECT BORROW_DATE

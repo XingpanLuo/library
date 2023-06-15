@@ -159,7 +159,7 @@ class readerPage(QWidget):
     def setContent(self):
         pages = [
             BookSearch(self.info['ID']),
-            ReaderBorrowHistory(self.info['ID']),
+            ReaderBorrowHistory(self.info['ID'],self),
             SelfInfo(self.info['ID'], self)
         ]
         if self.content is not None:
@@ -386,8 +386,9 @@ class BookSearch(QGroupBox):
 
 class ReaderBorrowHistory(QWidget):
 
-    def __init__(self, UID: str):
+    def __init__(self, UID: str,parent):
         super().__init__()
+        self.parent=parent
         self.UID = UID
         self.body = QVBoxLayout()
         self.table = None
@@ -444,7 +445,7 @@ class ReaderBorrowHistory(QWidget):
             itemBorrow = QToolButton(self.table)
             itemBorrow.setFixedSize(75, 25)
             itemBorrow.setText("归还")
-            itemBorrow.clicked.connect(lambda: self.returnBook())
+            itemBorrow.clicked.connect(lambda: self.returnBook(val[0]))
             itemLayout = QHBoxLayout()
             itemLayout.setContentsMargins(0, 0, 0, 0)
             itemLayout.addWidget(itemBorrow)
@@ -453,8 +454,9 @@ class ReaderBorrowHistory(QWidget):
             self.table.setCellWidget(1, 4, itemWidget)
 
     # 待完成
-    def returnBook(self):
-        pass
+    def returnBook(self,BID: str):
+        database.return_book(BID, self.UID)
+        self.parent.switch(1, self)
 
     def initUI(self):
         self.setFixedSize(900, 600)
