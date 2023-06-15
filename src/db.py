@@ -93,4 +93,131 @@ def create_violation_view(cursor):
     JOIN book bk ON b.book_ID = bk.ID;
     '''
     cursor.execute(sql)
+    
+
+def db_init_table(cursor):
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS reader(
+        ID char(8) PRIMARY KEY,
+        name varchar(10),
+        email varchar(30),
+        pwd char(64),
+        headshot varchar(255) default './headshot/default.jpg'
+    );
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS master(
+        ID char(8) PRIMARY KEY,
+        name varchar(10),
+        email varchar(30),
+        pwd char(64),
+        headshot varchar(255) default './headshot/default.jpg'
+    );
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS book(
+        ID char(8) PRIMARY KEY,
+        name varchar(10),
+        author varchar(10),
+        price float,
+        status int,
+        borrow_Times int,
+        reserve_Times int
+    );
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS borrow(
+        reader_ID char(8),
+        book_ID char(8),
+        borrow_Date date,
+        return_Date date,
+        PRIMARY KEY(book_ID, reader_ID)
+    );
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS reserve(
+        reader_ID char(8),
+        book_ID char(8),
+        reserve_Date date,
+        take_Date date,
+        PRIMARY KEY(book_ID, reader_ID)
+    );
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS violation(
+        reader_ID char(8),
+        book_ID char(8),
+        borrow_Date date,
+        PRIMARY KEY(reader_ID, book_ID, borrow_Date)
+    );
+    ''')
+    
+def db_init_data(cursor):
+    # master
+    cursor.execute('''
+    INSERT
+    INTO master (ID,name,pwd,email,headshot)
+    VALUES('master', 'master','123456','master@qq.com','./headshot/default.jpg');
+    ''')
+    # book
+    cursor.execute('''
+    INSERT
+    INTO book(ID, name, author, price, status, borrow_Times,reserve_Times)
+    VALUES('b1', '数据库系统实现', 'Ullman', 59.0, 1, 4,1);
+    ''')
+    cursor.execute('''
+    INSERT 
+    INTO book(ID, name, author, price, status, borrow_Times,reserve_Times) 
+    VALUES('b2', '数据结构', 'MAL', 70.0, 2,7,9);
+    ''')
+    cursor.execute('''
+    INSERT 
+    INTO book(ID, name, author, price, status, borrow_Times,reserve_Times) 
+    VALUES('b3', '组成原理', 'zxh', 68.0, 0,5,2);
+    ''')
+    # reader
+    cursor.execute('''
+        INSERT
+        INTO reader(ID,name,email,pwd,headshot)
+        VALUES('r1', 'lihua', 'a@qq.com', 'r1', './headshot/r1.png');
+    ''')
+    cursor.execute('''
+    INSERT
+    INTO reader(ID,name,email,pwd,headshot)
+    VALUES('r2', 'lilin', 'b@ustc.edu.cn', 'password', './headshot/r1.png');
+    ''')
+    # borrow
+    cursor.execute('''
+    INSERT
+    INTO borrow(reader_ID,book_ID,borrow_Date)
+    VALUES('r1','b1','2023-5-8') 
+    ''')
+    cursor.execute('''
+    INSERT
+    INTO borrow(reader_ID,book_ID,borrow_Date,return_Date)
+    VALUES('r2','b1','2023-7-8','2023-9-30') 
+    ''')
+    # reserve
+    cursor.execute('''
+    INSERT
+    INTO reserve(reader_ID,book_ID,reserve_Date,take_Date)
+    VALUES('r2','b1','2023-4-8','2023-6-9') 
+    ''')
+    
+    cursor.execute('''
+    INSERT
+    INTO reserve(reader_ID,book_ID,reserve_Date)
+    VALUES('r1','b2','2023-5-7') 
+    ''')
+    # violation
+    cursor.execute('''
+    INSERT
+    INTO violation(reader_ID,book_ID,borrow_Date)
+    VALUES('r1','b1','2023-2-9') 
+    ''')
 
