@@ -124,7 +124,7 @@ def db_init_table(cursor):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS book(
         ID char(8) PRIMARY KEY,
-        name varchar(30),
+        name varchar(40),
         author varchar(20),
         price float,
         status int,
@@ -161,17 +161,11 @@ def db_init_table(cursor):
         PRIMARY KEY(reader_ID, book_ID, borrow_Date)
     );
     ''')
-    return
+
     cursor.execute('''
-    delimiter \\
     CREATE TRIGGER takedates AFTER INSERT
     ON reserve for each row
-    begin
-    SELECT book_ID INTO @ID FROM INSERTED ;
-    SELECT DATE_ADD((select reserve_Date FROM INSERTED) ,INTERVAL 10 DAY) INTO @TAKE_DATE;
-    UPDATE reserve SET take_Date=@TAKE_DATE WHERE book_ID=@ID;
-    end;
-    \\
+    UPDATE book SET status=3-status WHERE ID=NEW.book_ID;
     ''')
 
 

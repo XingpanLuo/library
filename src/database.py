@@ -562,6 +562,32 @@ def get_borrow_list(ID: str, BID: bool = False) -> list:
         return res
 
 
+# 新增预约函数
+def reserve(rid: str, bid: str) -> bool:
+    try:
+        res = True
+        conn = pymysql.connect(host=CONFIG['host'],
+                               user=CONFIG['user'],
+                               passwd=CONFIG['pwd'],
+                               port=CONFIG['port'],
+                               db=CONFIG['db'])
+        cursor = conn.cursor()
+        BACK_DATE = time.strftime("%Y-%m-%d-%H:%M")
+        cursor.execute(
+            '''
+            insert into reserve(reader_ID, book_ID, reserve_Date) values(%s,%s,%s)
+            ''', (rid, bid, BACK_DATE))
+        conn.commit()
+    except Exception as e:
+        print('get borrowing books error!')
+        print(e)
+        res = False
+    finally:
+        if conn:
+            conn.close()
+        return res
+
+
 # 获取学生的预约信息
 def get_reserve_list(ID: str, BID: bool = False) -> list:
     try:
@@ -582,14 +608,14 @@ def get_reserve_list(ID: str, BID: bool = False) -> list:
                 SELECT *
                 FROM reserve_view
                 WHERE book_ID=%s
-                ''', (ID))
+                ''', ID)
         else:
             cursor.execute(
                 '''
                 SELECT *
                 FROM reserve_view
                 WHERE reader_ID=%s
-            ''', (ID))
+            ''', ID)
         res = cursor.fetchall()
         temp = []
         for i in res:
@@ -761,7 +787,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                 FROM log, book
                 WHERE log.BID=%s AND book.BID=log.BID
                 ORDER BY BACK_DATE
-            ''', (ID, ))
+            ''', (ID,))
         else:
             cursor.execute(
                 '''
@@ -769,7 +795,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                 FROM log, book
                 WHERE SID=%s AND book.BID=log.BID
                 ORDER BY BACK_DATE
-            ''', (ID, ))
+            ''', (ID,))
         res = cursor.fetchall()
     except Exception as e:
         print('get log error!')
