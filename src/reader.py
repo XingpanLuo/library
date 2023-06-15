@@ -62,9 +62,15 @@ class readerPage(QWidget):
         self.out.setText('退出')
         self.out.setFixedHeight(30)
 
+        self.headshot_ = QLabel(self)
+        print(self.info['headshot'])
+        self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
+        self.headshot_.setPixmap(self.headshot)
+
         titleLayout = QHBoxLayout()
         titleLayout.addSpacing(100)
         titleLayout.addWidget(self.title)
+        titleLayout.addWidget(self.headshot_)
         titleLayout.addWidget(self.account)
         titleLayout.addWidget(self.out)
         self.titleBar.setLayout(titleLayout)
@@ -244,6 +250,7 @@ class BookSearch(QGroupBox):
     # 插入行
     def insertRow(self, val: list):
         print(val)
+        borrowinfo = database.get_borrow_list(val[0], True)
         itemBID = QTableWidgetItem(val[0])
         itemBID.setTextAlignment(Qt.AlignCenter)
 
@@ -471,8 +478,7 @@ class SelfInfo(QWidget):
 
         # 头像
         self.headshot_ = QLabel(self)
-        print(self.stu_info['headshot'])
-        self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
+        self.headshot = QPixmap(self.stu_info['headshot']).scaled(50, 50)
         self.headshot_.setPixmap(self.headshot)
         self.headshot_.resize(200, 200)
 

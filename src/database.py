@@ -91,6 +91,8 @@ def convert_master(val: list):
         'headshot': remove_blank(val[3])
     }
     return ans
+
+
 # 将日期延后两个月
 def postpone(start: str):
     temp = start.split('-')
@@ -316,6 +318,7 @@ def update_reader(user_message: dict, state) -> bool:
             conn.close()
         return res
 
+
 def update_master(user_message: dict, state) -> bool:
     '''
     传入字典格式如下
@@ -336,7 +339,7 @@ def update_master(user_message: dict, state) -> bool:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
-        print(user_message,state)
+        print(user_message, state)
         if state == 1:
             cursor.execute(
                 '''
@@ -364,6 +367,8 @@ def update_master(user_message: dict, state) -> bool:
         if conn:
             conn.close()
         return res
+
+
 # 获取学生信息
 def get_reader_info(ID: str) -> dict:
     try:
@@ -388,6 +393,7 @@ def get_reader_info(ID: str) -> dict:
             conn.close()
         return convert(ans)
 
+
 def get_master_info(ID: str) -> dict:
     try:
         conn = pymysql.connect(host=CONFIG['host'],
@@ -410,6 +416,8 @@ def get_master_info(ID: str) -> dict:
         if conn:
             conn.close()
         return convert_master(ans)
+
+
 # 查找学生
 def search_reader(info: str) -> list:
     try:
@@ -522,7 +530,7 @@ def get_borrow_list(ID: str, BID: bool = False) -> list:
                 SELECT *
                 FROM borrow_view;
                 ''')
-        elif BID:
+        elif BID is True:
             cursor.execute(
                 '''
                 SELECT *
@@ -753,7 +761,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                 FROM log, book
                 WHERE log.BID=%s AND book.BID=log.BID
                 ORDER BY BACK_DATE
-            ''', (ID,))
+            ''', (ID, ))
         else:
             cursor.execute(
                 '''
@@ -761,7 +769,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                 FROM log, book
                 WHERE SID=%s AND book.BID=log.BID
                 ORDER BY BACK_DATE
-            ''', (ID,))
+            ''', (ID, ))
         res = cursor.fetchall()
     except Exception as e:
         print('get log error!')
