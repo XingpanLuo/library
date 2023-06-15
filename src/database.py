@@ -65,13 +65,14 @@ def convert(val: list):
         return None
     val = val[0]
     # 如果是学生
+    # 疑似在某个地方有bug
     if len(val) >= 3:
         ans = {
             'class': 'reader',
             'ID': remove_blank(val[0]),
             'NAME': remove_blank(val[1]),
             'EMAIL': remove_blank(val[2]),
-            'headshot': remove_blank(val[3])
+            'headshot': remove_blank(val[-1])
         }
     else:
         ans = {'class': 'master', 'ID': remove_blank(val[0])}

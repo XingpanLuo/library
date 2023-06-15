@@ -99,8 +99,16 @@
 - 其他均为状态0
 
 ## 提交18 by lxp
+
 1. 修改chooseHeadFile() 函数，支持任意路径
 2. 管理员加入chooseHeadFile()
+
+## 提交19 by xyp
+
+1. 完善读者前端按钮限制逻辑
+2. 修改 init.sql 的初始图像问题（default.png变jpg）
+3. database.py 的 convert 函数不知道为什么有时候会传入不太对的字典，不过反正我改对了
+4. 提醒一下 Markdown 规范要求标题和上下文要有空行
 
 ## 借阅逻辑
 

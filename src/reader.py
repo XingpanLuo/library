@@ -82,14 +82,9 @@ class readerPage(QWidget):
         self.out.setText('退出')
         self.out.setFixedHeight(30)
 
-        self.headshot_ = QLabel(self)
-        self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
-        self.headshot_.setPixmap(self.headshot)
-
         titleLayout = QHBoxLayout()
         titleLayout.addSpacing(100)
         titleLayout.addWidget(self.title)
-        titleLayout.addWidget(self.headshot_)
         titleLayout.addWidget(self.account)
         titleLayout.addWidget(self.out)
         self.titleBar.setLayout(titleLayout)
@@ -276,7 +271,8 @@ class BookSearch(QGroupBox):
         # 检测是否是本人借的或预约的
         is_rent_by_self = False
         for _borrowinfo in database.get_borrow_list(val[0], True):
-            if _borrowinfo[0] == self.SID:
+            # 借阅记录是自己的而且没还
+            if _borrowinfo[0] == self.SID and _borrowinfo[-1] is None:
                 is_rent_by_self = True
         is_reserve_by_self = False
         for _reserveinfo in database.get_reserve_list(val[0], True):
@@ -404,7 +400,7 @@ class ReaderBorrowHistory(QWidget):
 
     def showHistory(self):
         history = database.get_borrow_list(self.UID, False)
-        print(history)
+        # print(history)
         self.table = QTableWidget(1, 5)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.verticalHeader().setVisible(False)

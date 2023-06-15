@@ -29,12 +29,12 @@ insert into book(ID, name, author, price, status, borrow_Times,reserve_Times) va
 
 -- # reader;
 INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r1','lihua','a@qq.com','r1','./headshot/r1.png');
-INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r2','lilin','b@ustc.edu.cn','password','./headshot/default.png');
-INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r3','zs','c@qq.com','r3','./headshot/default.png');
-INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r4','ls','d@ustc.edu.cn','password','./headshot/default.png');
-INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r5','ww','e@qq.com','r5','./headshot/default.png');
-INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r6','a','f@ustc.edu.cn','password','./headshot/default.png');
-INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r7','b','g@qq.com','r7','./headshot/default.png');
+INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r2','lilin','b@ustc.edu.cn','password','./headshot/default.jpg');
+INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r3','zs','c@qq.com','r3','./headshot/default.jpg');
+INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r4','ls','d@ustc.edu.cn','password','./headshot/default.jpg');
+INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r5','ww','e@qq.com','r5','./headshot/default.jpg');
+INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r6','a','f@ustc.edu.cn','password','./headshot/default.jpg');
+INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r7','b','g@qq.com','r7','./headshot/default.jpg');
 INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r8','c','h@ustc.edu.cn','password','./headshot/r1.png');
 
 -- # borrow;
