@@ -290,12 +290,14 @@ class BookSearch(QGroupBox):
         itemBorrow_exist = False
         itemBorrow = QToolButton(self.table)
         itemBorrow.setFixedSize(75, 25)
-        if val[4] == 0 and is_rent_by_self is False:
+        # 可借阅逻辑：书在馆无预约或有预约且预约者为本人
+        if val[4] == 0 or (val[4] == 3 and is_rent_by_self is True):
             itemBorrow_exist = True
             itemBorrow.setText('借阅')
             itemBorrow.clicked.connect(
                 lambda: self.updateBorrowFunction(val[0]))
-        elif val[4] == 1 and is_rent_by_self is False:
+        # 书可预约逻辑：书籍状态为1且不是本人借的
+        elif val[4] == 1 and (is_rent_by_self is False):
             itemBorrow_exist = True
             itemBorrow.setText('预约')
             itemBorrow.clicked.connect(
