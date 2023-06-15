@@ -379,7 +379,7 @@ def update_reader(user_message: dict, state) -> bool:
             cursor.execute(
                 '''
                 UPDATE reader
-                SET name=%s, email=%s, pwd=%s, headshot=\"%s\"
+                SET name=%s, email=%s, pwd=%s, headshot=%s
                 WHERE ID=%s
                 ''', (user_message['NAME'], user_message['EMAIL'],
                       user_message['PWD'], user_message['headshot'],
@@ -389,7 +389,7 @@ def update_reader(user_message: dict, state) -> bool:
             cursor.execute(
                 '''
                 UPDATE reader
-                SET name=%s, email=%s, headshot=\"%s\"
+                SET name=%s, email=%s, headshot=%s
                 WHERE ID=%s
                 ''', (user_message['NAME'], user_message['EMAIL'],
                       user_message['headshot'], user_message['ID']))

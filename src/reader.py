@@ -147,12 +147,14 @@ class readerPage(QWidget):
         if self.focus == 0:
             self.content = pages[0]
         elif self.focus == 1:
+            # pages[1].refresh()
             self.content = pages[1]
         elif self.focus == 2:
+            # pages[2].refresh()
             self.content = pages[2]
         elif self.focus == 3:
-            self.content = pages[1]
-            # pages[1] = ReaderBorrowHistory(self.info['ID'])
+            self.content = pages[0]
+            pages[1].refresh()
             pages[2].refresh()
         self.body.addWidget(self.content)
 
@@ -333,6 +335,9 @@ class ReaderBorrowHistory(QWidget):
         self.setLayout(self.body)
         self.initUI()
 
+    def refresh(self):
+        self.showHistory()
+
     def showHistory(self):
         history = database.get_borrow_list(self.UID, False)
         print(history)
@@ -465,6 +470,7 @@ class SelfInfo(QWidget):
 
         # 头像
         self.headshot_ = QLabel(self)
+        print(self.stu_info['headshot'])
         self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
         self.headshot_.setPixmap(self.headshot)
         self.headshot_.resize(200, 200)
