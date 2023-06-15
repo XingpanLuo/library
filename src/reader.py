@@ -27,16 +27,14 @@ class readerPage(QWidget):
         self.info = info
         self.focus = 0
         # 老赖提醒
-        is_tle = False if len(database.get_violation_list(
-            info['ID'])) == 0 else True
-        if is_tle is True:
-            msgBox = QMessageBox(QMessageBox.Warning, "错误!", '有书籍超期，请先还书再操作!',
-                                 QMessageBox.NoButton, self)
-            msgBox.addButton("确认", QMessageBox.AcceptRole)
-            msgBox.exec_()
+        # is_tle = False if len(database.get_violation_list(
+        #     info['ID'])) == 0 else True
+        # if is_tle is True:
+        #     self.errorBox('错误!有书籍超期，请先还书再操作!')
         self.initUI()
 
     def initUI(self):
+        self.setFixedSize(1280, 720)
         # 标题栏
         self.titleBar = QWidget()
         self.titleBar.setFixedSize(1250, 50)
@@ -53,9 +51,20 @@ class readerPage(QWidget):
         self.bodyLayout.addWidget(self.body, 1, 0, 7, 7)
         self.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.bodyLayout)
-        self.setFixedSize(1280, 720)
+        
         self.setMyStyle()
 
+    def errorBox(self, mes: str):
+        msgBox = QMessageBox(
+            QMessageBox.Warning,
+            "警告!",
+            mes,
+            QMessageBox.NoButton,
+            self
+        )
+        msgBox.addButton("确认", QMessageBox.AcceptRole)
+        msgBox.exec_()
+        
     # 设置标题栏
     def setTitleBar(self):
         self.title = QLabel()

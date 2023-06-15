@@ -956,6 +956,7 @@ def delete_book(ID: str):
             db=CONFIG['db'],
         )
         cursor = conn.cursor()
+        cursor.execute("START TRANSACTION")
         # 执行存储过程
         print(ID)
         cursor.callproc('delete_book', args=(ID, "", ""))
@@ -1048,16 +1049,6 @@ def borrow_book(BID: str, SID: str) -> bool:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
-        # 先把借书日期，书本剩余数量，罚金等信息找出
-        # cursor.execute(
-        #     '''
-        # SELECT NUM
-        # FROM book
-        # WHERE BID=%s
-        # ''', (BID))
-        # book_mes = cursor.fetchall()
-        # # print(book_mes)
-        # NUM = book_mes[0][0]
         BORROW_DATE = time.strftime("%Y-%m-%d-%H:%M")
         DEADLINE = postpone(BORROW_DATE)
 
