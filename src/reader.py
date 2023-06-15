@@ -353,6 +353,7 @@ class BookSearch(QGroupBox):
         if book_info is None:
             return
         database.borrow_book(book_info['ID'], self.SID)
+        self.searchFunction()
 
     # 待完成
     def updateReserveFunction(self, BID: str):
@@ -588,25 +589,32 @@ class SelfInfo(QWidget):
         if e.text() == e.initText:
             e.setText('')
 
+    # def chooseHeadFile(self):
+    #     while True:
+    #         image_file, _ = QFileDialog.getOpenFileName(
+    #             self, 'Open file', './headshot',
+    #             'Image files (*.jpg *.gif *.png *.jpeg)')
+    #         if False:  # not image_file.startswith(os.getcwd()):# 看起来检测路径貌似并不容易
+    #             msgBox = QMessageBox(QMessageBox.Warning, "错误!",
+    #                                  '头像文件必须在指定目录下!', QMessageBox.NoButton,
+    #                                  self)
+    #             msgBox.addButton("确认", QMessageBox.AcceptRole)
+    #             msgBox.exec_()
+    #             continue
+    #         else:
+    #             # 为了兼容windows做了一点修改
+    #             image_file = image_file.replace("\\", "/")
+    #             image_file = "./headshot/" + image_file.split('/')[-1]
+    #             self.stu_info['headshot'] = image_file
+    #             self.headInput.setText(str(self.stu_info['headshot']))
+    #             return
     def chooseHeadFile(self):
-        while True:
-            image_file, _ = QFileDialog.getOpenFileName(
-                self, 'Open file', './headshot',
-                'Image files (*.jpg *.gif *.png *.jpeg)')
-            if False:  # not image_file.startswith(os.getcwd()):# 看起来检测路径貌似并不容易
-                msgBox = QMessageBox(QMessageBox.Warning, "错误!",
-                                     '头像文件必须在指定目录下!', QMessageBox.NoButton,
-                                     self)
-                msgBox.addButton("确认", QMessageBox.AcceptRole)
-                msgBox.exec_()
-                continue
-            else:
-                # 为了兼容windows做了一点修改
-                image_file = image_file.replace("\\", "/")
-                image_file = "./headshot/" + image_file.split('/')[-1]
-                self.stu_info['headshot'] = image_file
-                return
-
+        # 实现chooseHeadFile方法，用于选择头像文件
+        filePath, fileType = QFileDialog.getOpenFileName(self, '选择文件', '.', 'Image files(*.png *.jpg *.jpeg *.bmp)')
+        self.headInput.setText(filePath)
+        self.stu_info['headshot'] = filePath
+        self.headInput.setText(str(self.stu_info['headshot']))
+        
     def submitFunction(self):
         submit_state = 0
         if os.path.exists(self.stu_info['headshot']) is False:

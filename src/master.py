@@ -1059,12 +1059,11 @@ class SelfInfo(QWidget):
         self.headInput.setText(str(self.stu_info['headshot']))
         self.headInput.initText = '请输入头像路径'
         self.headInput.setTextMargins(5, 5, 5, 5)
-        self.headInput.mousePressEvent = lambda x: self.inputClick(self.
-                                                                   headInput)
-
+        self.headInput.setEnabled(True)
+        self.headInput.mousePressEvent = lambda x: self.chooseHeadFile()
+        
         # 头像
         self.headshot_ = QLabel(self)
-        print(self.stu_info['headshot'])
         self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
         self.headshot_.setPixmap(self.headshot)
         self.headshot_.resize(200, 200)
@@ -1118,7 +1117,34 @@ class SelfInfo(QWidget):
                 item.setText(item.initText)
         if e.text() == e.initText:
             e.setText('')
-
+            
+    # def chooseHeadFile(self):
+    #     while True:
+    #         image_file, _ = QFileDialog.getOpenFileName(
+    #             self, 'Open file', './headshot',
+    #             'Image files (*.jpg *.gif *.png *.jpeg)')
+    #         if False:  # not image_file.startswith(os.getcwd()):# 看起来检测路径貌似并不容易
+    #             msgBox = QMessageBox(QMessageBox.Warning, "错误!",
+    #                                  '头像文件必须在指定目录下!', QMessageBox.NoButton,
+    #                                  self)
+    #             msgBox.addButton("确认", QMessageBox.AcceptRole)
+    #             msgBox.exec_()
+    #             continue
+    #         else:
+    #             # 为了兼容windows做了一点修改
+    #             image_file = image_file.replace("\\", "/")
+    #             image_file = "./headshot/" + image_file.split('/')[-1]
+    #             print(image_file)
+    #             self.stu_info['headshot'] = image_file
+    #             self.headInput.setText(str(self.stu_info['headshot']))
+    #             return
+    def chooseHeadFile(self):
+        # 实现chooseHeadFile方法，用于选择头像文件
+        filePath, fileType = QFileDialog.getOpenFileName(self, '选择文件', '.', 'Image files(*.png *.jpg *.jpeg *.bmp)')
+        self.headInput.setText(filePath)
+        self.stu_info['headshot'] = filePath
+        self.headInput.setText(str(self.stu_info['headshot']))      
+          
     def submitFunction(self):
         submit_state = 0
         if os.path.exists(self.headInput.text()) is False:
@@ -1138,7 +1164,7 @@ class SelfInfo(QWidget):
             self.stu_info['PWD'] = database.encrypt(self.passwordInput.text())
         self.stu_info['NAME'] = self.nameInput.text()
         self.stu_info['EMAIL'] = self.emailInput.text()
-        self.stu_info['headshot'] = self.headInput.text()
+        #self.stu_info['headshot'] = self.headInput.text()
 
         if database.update_master(self.stu_info, submit_state) is True:
             msgBox = QMessageBox(QMessageBox.Information, "成功", '更新信息成功',

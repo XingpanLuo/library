@@ -48,7 +48,7 @@ class MainWindow(QWidget):
             is_tle = False if len(database.get_violation_list(
             self.user['ID'])) == 0 else True
             if is_tle is True:
-                self.errorBox('错误!有书籍超期，请先还书再操作!')
+                self.errorBox('有书籍超期，请尽快归还!')
             self.login.setVisible(False)
             self.display()
         else:
