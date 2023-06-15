@@ -163,6 +163,7 @@ def db_init_table(cursor):
     ''')
 
 
+
 def db_init_data(cursor):
     # 提交14的新代码
     init_cmds = [

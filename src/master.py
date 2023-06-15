@@ -866,7 +866,7 @@ class ViolationManage(QWidget):
     # 标题栏
     def setTitleBar(self):
         self.title = QLabel()
-        self.title.setText('预约信息管理')
+        self.title.setText('违约信息管理')
         self.title.setFixedHeight(25)
         titleLayout = QHBoxLayout()
         titleLayout.addSpacing(50)
@@ -911,11 +911,11 @@ class ViolationManage(QWidget):
     def searchFunction(self, e: str = 'BID'):
         # 搜索书号
         if e == 'BID':
-            self.reserve_list = database.get_reserve_list(
+            self.reserve_list = database.get_violation_list(
                 self.searchInput.text(), True)
         else:
             # 搜索学号
-            self.reserve_list = database.get_reserve_list(
+            self.reserve_list = database.get_violation_list(
                 self.searchInput.text())
             self.SID = self.searchInput.text()
         if self.reserve_list == []:
