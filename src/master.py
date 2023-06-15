@@ -615,7 +615,8 @@ class BorrowManage(QWidget):
         self.table.setItem(0, 3, QTableWidgetItem('书名'))
         self.table.setItem(0, 4, QTableWidgetItem('借阅日期'))
         self.table.setItem(0, 5, QTableWidgetItem('归还日期'))
-        for i in range(6):
+        self.table.setItem(0, 6, QTableWidgetItem('归还'))
+        for i in range(7):
             self.table.item(0, i).setTextAlignment(Qt.AlignCenter)
             self.table.item(0, i).setFont(QFont('微软雅黑', 15))
         for i in self.borrow_list:
@@ -658,14 +659,28 @@ class BorrowManage(QWidget):
         self.table.setItem(1, 4, itemBorrowTime)
         self.table.setItem(1, 5, itemReturnTime)
         self.table.setCellWidget(1, 4, itemWidget)
+        print(val[5])
+        if val[5] == None:
+            itemBorrow = QToolButton(self.table)
+            itemBorrow.setFixedSize(75, 25)
+            itemBorrow.setText("归还")
+            itemBorrow.clicked.connect(lambda: self.returnBook(val[0], val[2], 0))
+            itemLayout = QHBoxLayout()
+            itemLayout.setContentsMargins(0, 0, 0, 0)
+            itemLayout.addWidget(itemBorrow)
+            itemWidget = QWidget()
+            itemWidget.setLayout(itemLayout)
+            self.table.setCellWidget(1, 6, itemWidget)
 
-    def retrurnBook(self, SID: str, BID: str, isPunished: int):
+
+    def returnBook(self, SID: str, BID: str, isPunished: int):
         if isPunished > 0:
             database.pay(BID, SID, isPunished)
-        ans = database.return_book(BID, SID)
+        # print(SID)
+        # print(BID)
+        database.return_book(BID, SID)
         # 刷新表格
-        if ans:
-            self.searchFunction('BID')
+        self.searchFunction('BID')
 
     def initUI(self):
         self.setFixedSize(1000, 600)

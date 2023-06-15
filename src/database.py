@@ -698,11 +698,13 @@ def return_book(bid: str, rid: str) -> bool:
         UPDATE borrow
         SET return_Date=%s
         WHERE reader_ID=%s AND book_ID=%s
+        ''', (BACK_DATE, rid, bid))
+        cursor.execute(
+            '''
         DELETE
         FROM violation
         WHERE reader_ID=%s AND book_ID=%s
-        ''',
-            (BACK_DATE,rid, bid,rid,bid))
+        ''', (rid, bid))
         conn.commit()
     except Exception as e:
         print('Return error!')
