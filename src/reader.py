@@ -82,9 +82,14 @@ class readerPage(QWidget):
         self.out.setText('退出')
         self.out.setFixedHeight(30)
 
+        self.headshot_ = QLabel(self)
+        self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
+        self.headshot_.setPixmap(self.headshot)
+
         titleLayout = QHBoxLayout()
         titleLayout.addSpacing(100)
         titleLayout.addWidget(self.title)
+        titleLayout.addWidget(self.headshot_)
         titleLayout.addWidget(self.account)
         titleLayout.addWidget(self.out)
         self.titleBar.setLayout(titleLayout)
@@ -159,7 +164,7 @@ class readerPage(QWidget):
     def setContent(self):
         pages = [
             BookSearch(self.info['ID']),
-            ReaderBorrowHistory(self.info['ID'],self),
+            ReaderBorrowHistory(self.info['ID']),
             SelfInfo(self.info['ID'], self)
         ]
         if self.content is not None:
@@ -271,8 +276,7 @@ class BookSearch(QGroupBox):
         # 检测是否是本人借的或预约的
         is_rent_by_self = False
         for _borrowinfo in database.get_borrow_list(val[0], True):
-            # 借阅记录是自己的而且没还
-            if _borrowinfo[0] == self.SID and _borrowinfo[-1] is None:
+            if _borrowinfo[0] == self.SID:
                 is_rent_by_self = True
         is_reserve_by_self = False
         for _reserveinfo in database.get_reserve_list(val[0], True):
@@ -349,7 +353,6 @@ class BookSearch(QGroupBox):
         if book_info is None:
             return
         database.borrow_book(book_info['ID'], self.SID)
-        self.searchFunction()
 
     # 待完成
     def updateReserveFunction(self, BID: str):
@@ -386,9 +389,8 @@ class BookSearch(QGroupBox):
 
 class ReaderBorrowHistory(QWidget):
 
-    def __init__(self, UID: str,parent):
+    def __init__(self, UID: str):
         super().__init__()
-        self.parent=parent
         self.UID = UID
         self.body = QVBoxLayout()
         self.table = None
@@ -401,7 +403,7 @@ class ReaderBorrowHistory(QWidget):
 
     def showHistory(self):
         history = database.get_borrow_list(self.UID, False)
-        # print(history)
+        print(history)
         self.table = QTableWidget(1, 5)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.verticalHeader().setVisible(False)
@@ -456,7 +458,6 @@ class ReaderBorrowHistory(QWidget):
     # 待完成
     def returnBook(self,BID: str):
         database.return_book(BID, self.UID)
-        self.parent.switch(1, self)
 
     def initUI(self):
         self.setFixedSize(900, 600)
@@ -587,32 +588,25 @@ class SelfInfo(QWidget):
         if e.text() == e.initText:
             e.setText('')
 
-    # def chooseHeadFile(self):
-    #     while True:
-    #         image_file, _ = QFileDialog.getOpenFileName(
-    #             self, 'Open file', './headshot',
-    #             'Image files (*.jpg *.gif *.png *.jpeg)')
-    #         if False:  # not image_file.startswith(os.getcwd()):# 看起来检测路径貌似并不容易
-    #             msgBox = QMessageBox(QMessageBox.Warning, "错误!",
-    #                                  '头像文件必须在指定目录下!', QMessageBox.NoButton,
-    #                                  self)
-    #             msgBox.addButton("确认", QMessageBox.AcceptRole)
-    #             msgBox.exec_()
-    #             continue
-    #         else:
-    #             # 为了兼容windows做了一点修改
-    #             image_file = image_file.replace("\\", "/")
-    #             image_file = "./headshot/" + image_file.split('/')[-1]
-    #             self.stu_info['headshot'] = image_file
-    #             self.headInput.setText(str(self.stu_info['headshot']))
-    #             return
     def chooseHeadFile(self):
-        # 实现chooseHeadFile方法，用于选择头像文件
-        filePath, fileType = QFileDialog.getOpenFileName(self, '选择文件', '.', 'Image files(*.png *.jpg *.jpeg *.bmp)')
-        self.headInput.setText(filePath)
-        self.stu_info['headshot'] = filePath
-        self.headInput.setText(str(self.stu_info['headshot']))
-        
+        while True:
+            image_file, _ = QFileDialog.getOpenFileName(
+                self, 'Open file', './headshot',
+                'Image files (*.jpg *.gif *.png *.jpeg)')
+            if False:  # not image_file.startswith(os.getcwd()):# 看起来检测路径貌似并不容易
+                msgBox = QMessageBox(QMessageBox.Warning, "错误!",
+                                     '头像文件必须在指定目录下!', QMessageBox.NoButton,
+                                     self)
+                msgBox.addButton("确认", QMessageBox.AcceptRole)
+                msgBox.exec_()
+                continue
+            else:
+                # 为了兼容windows做了一点修改
+                image_file = image_file.replace("\\", "/")
+                image_file = "./headshot/" + image_file.split('/')[-1]
+                self.stu_info['headshot'] = image_file
+                return
+
     def submitFunction(self):
         submit_state = 0
         if os.path.exists(self.stu_info['headshot']) is False:

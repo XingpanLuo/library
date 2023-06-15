@@ -703,9 +703,8 @@ def return_book(bid: str, rid: str) -> bool:
         ''', (rid, bid))
         book_mes = cursor.fetchall()
         print(book_mes)
-        BORROW_DATE = book_mes[0][0]
-        BACK_DATE = time.strftime("%Y-%m-%d-%H:%M")
-
+        BACK_DATE = datetime.date.today()
+        print(BACK_DATE)
         # book表内NUM加一，删除borrowing_book表内的记录，把记录插入log表
         # new 更新借阅表中的记录，删除违期表中的记录
         cursor.execute(
