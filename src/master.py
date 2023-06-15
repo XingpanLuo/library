@@ -7,14 +7,14 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QGridLayout, QGroupBox,
                              QLabel, QTableWidget, QTableWidgetItem,
                              QAbstractItemView, QLineEdit, QFileDialog,
                              QMessageBox, QComboBox)
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QIcon, QFont,QPixmap
 from PyQt5.QtCore import Qt, QSize
 
 try:
     import database
     import book_information
     import reader_information
-    import reader
+    # import reader
 except:
     from src import database
     from src import book_information
@@ -116,8 +116,16 @@ class AdministratorPage(QWidget):
         self.violationManage.clicked.connect(
             lambda: self.switch(4, self.borrowManage))
         self.borrowManage.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        
+        self.selfInfo = QToolButton()
+        self.selfInfo.setText('个人信息')
+        self.selfInfo.setFixedSize(160, 50)
+        self.selfInfo.setIconSize(QSize(30, 30))
+        self.selfInfo.clicked.connect(
+            lambda: self.switch(5, self.selfInfo))
+        self.borrowManage.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.btnList = [
-            self.bookManage, self.userManage, self.reserveManage, self.borrowManage, self.violationManage
+            self.bookManage, self.userManage, self.reserveManage, self.borrowManage, self.violationManage,self.selfInfo
         ]
 
         self.layout = QVBoxLayout()
@@ -126,6 +134,7 @@ class AdministratorPage(QWidget):
         self.layout.addWidget(self.reserveManage)
         self.layout.addWidget(self.borrowManage)
         self.layout.addWidget(self.violationManage)
+        self.layout.addWidget(self.selfInfo)
         self.layout.addStretch()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
@@ -152,8 +161,10 @@ class AdministratorPage(QWidget):
             self.content = ReserveManage()
         elif self.focus == 3:
             self.content = BorrowManage()
-        else:
+        elif self.focus==4:
             self.content = ViolationManage()
+        else:
+            self.content= SelfInfo(self)
         self.body.addWidget(self.content)
 
     def setMyStyle(self):
@@ -932,7 +943,7 @@ class ViolationManage(QWidget):
         self.table.setItem(0, 1, QTableWidgetItem('读者姓名'))
         self.table.setItem(0, 2, QTableWidgetItem('书号'))
         self.table.setItem(0, 3, QTableWidgetItem('书名'))
-        self.table.setItem(0, 4, QTableWidgetItem('预约日期'))
+        self.table.setItem(0, 4, QTableWidgetItem('借阅日期'))
         for i in range(5):
             self.table.item(0, i).setTextAlignment(Qt.AlignCenter)
             self.table.item(0, i).setFont(QFont('微软雅黑', 15))
@@ -982,6 +993,167 @@ class ViolationManage(QWidget):
     def initUI(self):
         self.setFixedSize(1000, 600)
 
+class SelfInfo(QWidget):
+
+    def __init__(self,parent):
+        super().__init__()
+        self.parent=parent
+        self.SID = 'master'
+        self.bodyLayout = QVBoxLayout()
+        self.show_page()
+        self.setLayout(self.bodyLayout)
+        self.initUI()
+
+    def refresh(self):
+        self.show_page()
+
+    def show_page(self):
+        self.stu_info = database.get_master_info(self.SID)
+        self.title = QLabel()
+        self.title.setText('管理员信息')
+
+        self.rid = QLabel()
+        self.rid.setText('账号')
+
+        self.rname = QLabel()
+        self.rname.setText('姓名')
+
+        self.email = QLabel()
+        self.email.setText('邮箱')
+
+        self.headname = QLabel()
+        self.headname.setText('头像')
+
+        self.pwd = QLabel()
+        self.pwd.setText('密码')
+
+        self.repwd = QLabel()
+        self.repwd.setText('重复密码')
+        # 学号输入框
+        self.SIDInput = QLineEdit()
+        self.SIDInput.setFixedSize(400, 40)
+        self.SIDInput.setText(self.stu_info['ID'])
+        self.SIDInput.initText = '请输入学号'
+        self.SIDInput.setEnabled(False)
+
+        # 姓名输入框
+        self.nameInput = QLineEdit()
+        self.nameInput.setFixedSize(400, 40)
+        self.nameInput.setText(self.stu_info['NAME'])
+        self.nameInput.initText = '请输入姓名'
+        self.nameInput.setTextMargins(5, 5, 5, 5)
+        self.nameInput.mousePressEvent = lambda x: self.inputClick(self.
+                                                                   nameInput)
+        # 邮箱
+        self.emailInput = QLineEdit()
+        self.emailInput.setFixedSize(400, 40)
+        self.emailInput.setText(str(self.stu_info['EMAIL']))
+        self.emailInput.initText = '请输入邮箱'
+        self.emailInput.setTextMargins(5, 5, 5, 5)
+        self.emailInput.mousePressEvent = lambda x: self.inputClick(self.
+                                                                    emailInput)
+
+        # 头像
+        self.headInput = QLineEdit()
+        self.headInput.setFixedSize(400, 40)
+        self.headInput.setText(str(self.stu_info['headshot']))
+        self.headInput.initText = '请输入头像路径'
+        self.headInput.setTextMargins(5, 5, 5, 5)
+        self.headInput.mousePressEvent = lambda x: self.inputClick(self.
+                                                                   headInput)
+
+        # 头像
+        self.headshot_ = QLabel(self)
+        print(self.stu_info['headshot'])
+        self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
+        self.headshot_.setPixmap(self.headshot)
+        self.headshot_.resize(200, 200)
+
+        # 密码
+        self.passwordInput = QLineEdit()
+        self.passwordInput.setEchoMode(QLineEdit.Password)
+        self.passwordInput.setFixedSize(400, 40)
+        self.passwordInput.setText('请输入密码')
+        self.passwordInput.initText = '请输入密码'
+        self.passwordInput.setTextMargins(5, 5, 5, 5)
+        self.passwordInput.mousePressEvent = lambda x: self.inputClick(
+            self.passwordInput)
+
+        # 重复密码
+        self.repPasswordInput = QLineEdit()
+        self.repPasswordInput.setEchoMode(QLineEdit.Password)
+        self.repPasswordInput.setFixedSize(400, 40)
+        self.repPasswordInput.setText('请重复密码')
+        self.repPasswordInput.initText = '请重复密码'
+        self.repPasswordInput.setTextMargins(5, 5, 5, 5)
+        self.repPasswordInput.mousePressEvent = lambda x: self.inputClick(
+            self.repPasswordInput)
+
+        # 提交
+        self.submit = QToolButton()
+        self.submit.setText('提交')
+        self.submit.setFixedSize(400, 40)
+        self.submit.clicked.connect(self.submitFunction)
+
+        self.btnList = [
+            self.SIDInput, self.nameInput, self.emailInput, self.headInput,
+            self.passwordInput, self.repPasswordInput
+        ]
+
+        self.lableList = [
+            self.rid, self.rname, self.email, self.headname, self.pwd,
+            self.repwd
+        ]
+
+        self.bodyLayout.addWidget(self.headshot_)
+        self.bodyLayout.addWidget(self.title)
+        for i in range(0, len(self.btnList)):
+            self.bodyLayout.addWidget(self.lableList[i])
+            self.bodyLayout.addWidget(self.btnList[i])
+        self.bodyLayout.addWidget(self.submit)
+
+    def inputClick(self, e):
+        for item in self.btnList:
+            if item.text() == '':
+                item.setText(item.initText)
+        if e.text() == e.initText:
+            e.setText('')
+
+    def submitFunction(self):
+        submit_state = 0
+        if os.path.exists(self.headInput.text()) is False:
+            msgBox = QMessageBox(QMessageBox.Warning, "错误!", '头像文件不存在!',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+            return
+        if self.passwordInput.text() != self.passwordInput.initText:
+            submit_state = 1
+            if self.passwordInput.text() != self.repPasswordInput.text():
+                msgBox = QMessageBox(QMessageBox.Warning, "错误!", '两次输入密码不一致!',
+                                     QMessageBox.NoButton, self)
+                msgBox.addButton("确认", QMessageBox.AcceptRole)
+                msgBox.exec_()
+                return
+            self.stu_info['PWD'] = database.encrypt(self.passwordInput.text())
+        self.stu_info['NAME'] = self.nameInput.text()
+        self.stu_info['EMAIL'] = self.emailInput.text()
+        self.stu_info['headshot'] = self.headInput.text()
+
+        if database.update_master(self.stu_info, submit_state) is True:
+            msgBox = QMessageBox(QMessageBox.Information, "成功", '更新信息成功',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+        else:
+            msgBox = QMessageBox(QMessageBox.Warning, "错误", '更新信息失败',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+        self.parent.switch(5, self)
+
+    def initUI(self):
+        self.setFixedSize(900, 600)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

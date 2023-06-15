@@ -23,9 +23,9 @@ config = {
 一般修改密码pwd就行。mysql端口默认是3306
 
 表：
-reader: ID:char(8),name:varchar(10),email:varchar(30),pwd:char(64),headshot:varchar(255)
-
 master: ID:char(8),name:varchar(10),email:varchar(30),pwd:char(64),headshot:varchar(255)
+
+reader: ID:char(8),name:varchar(10),email:varchar(30),pwd:char(64),headshot:varchar(255)
 
 book: ID:char(8),name:varchar(10),author:varchar(10),price:float,status:int,borrow_Times:int,reserve_Times:int
 

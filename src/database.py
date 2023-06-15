@@ -78,6 +78,19 @@ def convert(val: list):
     return ans
 
 
+def convert_master(val: list):
+    print(val)
+    if len(val) == 0:
+        return None
+    val = val[0]
+    ans = {
+        'class': 'master',
+        'ID': remove_blank(val[0]),
+        'NAME': remove_blank(val[1]),
+        'EMAIL': remove_blank(val[2]),
+        'headshot': remove_blank(val[3])
+    }
+    return ans
 # 将日期延后两个月
 def postpone(start: str):
     temp = start.split('-')
@@ -138,7 +151,9 @@ def init_database():
         CREATE TABLE IF NOT EXISTS master(
             ID char(8) PRIMARY KEY,
             name varchar(10),
-            pwd char(64)
+            email varchar(30),
+            pwd char(64),
+            headshot varchar(255) default './headshot/default.jpg'
         );
         ''')
 
@@ -184,8 +199,8 @@ def init_database():
         ''')
         cursor.execute('''
         INSERT
-        INTO master (ID,name,pwd)
-        VALUES('master', 'master','123456');
+        INTO master (ID,name,pwd,email,headshot)
+        VALUES('master', 'master','123456','master@qq.com','./headshot/default.jpg');
         ''')
         # book: ID:char(8),name:varchar(10),author:varchar(10),price:float,status:int,borrow_Times:int,reserve_Times:int
         cursor.execute('''
@@ -225,6 +240,23 @@ def init_database():
         INSERT
         INTO borrow(reader_ID,book_ID,borrow_Date,return_Date)
         VALUES('r2','b1','2023-7-8','2023-9-30') 
+        ''')
+        cursor.execute('''
+        INSERT
+        INTO reserve(reader_ID,book_ID,reserve_Date,take_Date)
+        VALUES('r2','b1','2023-4-8','2023-6-9') 
+        ''')
+        
+        cursor.execute('''
+        INSERT
+        INTO reserve(reader_ID,book_ID,reserve_Date)
+        VALUES('r1','b2','2023-5-7') 
+        ''')
+        
+        cursor.execute('''
+        INSERT
+        INTO violation(reader_ID,book_ID,borrow_Date)
+        VALUES('r1','b1','2023-2-9') 
         ''')
         db.create_procedure_add_book(cursor)
         db.create_procedure_delete_book(cursor)
@@ -403,7 +435,54 @@ def update_reader(user_message: dict, state) -> bool:
             conn.close()
         return res
 
-
+def update_master(user_message: dict, state) -> bool:
+    '''
+    传入字典格式如下
+    user_message{
+        'ID': str,
+        'NAME': str,
+        'EMAIL': str,
+        'PWD': str,
+        'headshot': str
+    }
+    返回bool
+    '''
+    try:
+        res = True
+        conn = pymysql.connect(host=CONFIG['host'],
+                               user=CONFIG['user'],
+                               passwd=CONFIG['pwd'],
+                               port=CONFIG['port'],
+                               db=CONFIG['db'])
+        cursor = conn.cursor()
+        print(user_message,state)
+        if state == 1:
+            cursor.execute(
+                '''
+                UPDATE master
+                SET NAME=%s, EMAIL=%s, PWD=%s, headshot=%s
+                WHERE ID=%s
+                ''', (user_message['NAME'], user_message['EMAIL'],
+                      user_message['PWD'], user_message['headshot'],
+                      user_message['ID']))
+            conn.commit()
+        if state == 0:
+            cursor.execute(
+                '''
+                UPDATE master
+                SET name=%s, email=%s, headshot=%s
+                WHERE ID=%s
+                ''', (user_message['NAME'], user_message['EMAIL'],
+                      user_message['headshot'], user_message['ID']))
+            conn.commit()
+    except Exception as e:
+        print('Update error!')
+        print(e)
+        res = False
+    finally:
+        if conn:
+            conn.close()
+        return res
 # 获取学生信息
 def get_reader_info(ID: str) -> dict:
     try:
@@ -428,7 +507,28 @@ def get_reader_info(ID: str) -> dict:
             conn.close()
         return convert(ans)
 
-
+def get_master_info(ID: str) -> dict:
+    try:
+        conn = pymysql.connect(host=CONFIG['host'],
+                               user=CONFIG['user'],
+                               passwd=CONFIG['pwd'],
+                               port=CONFIG['port'],
+                               db=CONFIG['db'])
+        cursor = conn.cursor()
+        cursor.execute(
+            '''
+            SELECT ID, NAME, EMAIL, headshot
+            FROM master
+            WHERE ID=%s
+            ''', (ID))
+        ans = cursor.fetchall()
+    except Exception as e:
+        print(e)
+        print('get reader info error')
+    finally:
+        if conn:
+            conn.close()
+        return convert_master(ans)
 # 查找学生
 def search_reader(info: str) -> list:
     try:

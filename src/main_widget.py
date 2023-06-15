@@ -73,7 +73,7 @@ class MainWindow(QWidget):
         self.user['PASSWORD'] = database.encrypt(self.user['PASSWORD'])
 
         ans = database.signup(self.user)
-        self.user['class'] = 'stu'
+        self.user['class'] = 'reader'
         self.user['ID'] = self.user['SID']
         self.user.pop('PASSWORD')
         if ans:

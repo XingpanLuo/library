@@ -140,7 +140,7 @@ class readerPage(QWidget):
         pages = [
             BookSearch(self.info['ID']),
             ReaderBorrowHistory(self.info['ID']),
-            SelfInfo(self.info['ID'])
+            SelfInfo(self.info['ID'],self)
         ]
         if self.content is not None:
             self.content.deleteLater()
@@ -402,8 +402,9 @@ class ReaderBorrowHistory(QWidget):
 
 class SelfInfo(QWidget):
 
-    def __init__(self, SID: str):
+    def __init__(self, SID: str,parent):
         super().__init__()
+        self.parent=parent
         self.SID = SID
         self.bodyLayout = QVBoxLayout()
         self.show_page()
@@ -489,8 +490,8 @@ class SelfInfo(QWidget):
         self.repPasswordInput = QLineEdit()
         self.repPasswordInput.setEchoMode(QLineEdit.Password)
         self.repPasswordInput.setFixedSize(400, 40)
-        self.repPasswordInput.setText('请重复输入密码')
-        self.repPasswordInput.initText = '请重复输入密码'
+        self.repPasswordInput.setText('请重复密码')
+        self.repPasswordInput.initText = '请重复密码'
         self.repPasswordInput.setTextMargins(5, 5, 5, 5)
         self.repPasswordInput.mousePressEvent = lambda x: self.inputClick(
             self.repPasswordInput)
@@ -556,6 +557,8 @@ class SelfInfo(QWidget):
                                  QMessageBox.NoButton, self)
             msgBox.addButton("确认", QMessageBox.AcceptRole)
             msgBox.exec_()
+        
+        self.parent.switch(2, self)
 
     def initUI(self):
         self.setFixedSize(900, 600)
