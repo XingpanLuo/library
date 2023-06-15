@@ -1,15 +1,4 @@
--- # 此处仅用于初始化数据，且注释必须用分号结尾;
-
-delimiter \\
-CREATE TRIGGER takedates AFTER INSERT
-ON reserve for each row
-begin
-SELECT book_ID INTO @ID FROM INSERTED ;
-SELECT DATE_ADD((select reserve_Date FROM INSERTED) ,INTERVAL 10 DAY) INTO @TAKE_DATE;
-UPDATE reserve SET take_Date=@TAKE_DATE WHERE book_ID=@ID;
-end;
-\\
-
+-- # This is only used for initializing data, and comments must end with a semicolon;
 -- # master;
 INSERT INTO master (ID, name, pwd, email, headshot)
 VALUES(
@@ -20,23 +9,23 @@ VALUES(
 		'./headshot/default.jpg'
 	);
 -- # book;
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b1', '数据库系统实现', 'Ullman', 59.0, 4, 2,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b2', '数据库系统概念', 'Abraham', 59.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b1', 'DB archive', 'Ullman', 59.0, 4, 2,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b2', 'DB concepts', 'Abraham', 59.0, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b3', 'C++ Primer', 'Stanley', 78.6, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b4', 'Redis设计与实现', '黄建宏', 79.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b4', 'Redis design and archive', 'HUANG JIANHONG', 79.0, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b5', 'Creature', 'John', 114514.00, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b6', '史记(公版)', '司马迁', 220.2, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b7', 'Oracle编程艺术', 'Thomas', 43.1, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b8', '分布式系统及其应用', '邵佩英', 30.0, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b9', 'Oracle管理', '张立杰', 51.9, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b10', '数理逻辑', '汪芳庭', 22.0, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b11', '三体', '刘慈欣', 23.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b6', 'Shiji', 'SIMA QIAN', 220.2, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b7', 'Oracle programming', 'Thomas', 43.1, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b8', 'Distributed systems', 'Shao Peiying', 30.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b9', 'Oracle management', 'Zhang Lijie', 51.9, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b10', 'mathematical logic', 'Wang Fangting', 22.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b11', 'THree Body', 'Liu Cixin', 23.0, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b12', 'Fun python', 'Luciano', 354.2, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b13', 'Learn SQL', 'Seyed', 23.0, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b14', 'Perl&MySQL', '徐泽平', 23.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b14', 'Perl&MySQL', 'Xu Zeping', 23.0, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b15', 'Shadows', 'John', 1919.0, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b16', '品鉴迎宾酒', '我修院', 810.0, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b17', '昏睡红茶', '田所浩二', 114.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b16', 'Taste Welcome Wine', 'WoXiuYuan', 810.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b17', 'Sleepy red tea', 'Tiansuo Haoer', 114.0, 0, 0,0);
 
 -- # reader;
 INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r1','lihua','a@qq.com','r1','./headshot/r1.png');

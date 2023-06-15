@@ -63,7 +63,6 @@ class readerPage(QWidget):
         self.out.setFixedHeight(30)
 
         self.headshot_ = QLabel(self)
-        print(self.info['headshot'])
         self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
         self.headshot_.setPixmap(self.headshot)
 
