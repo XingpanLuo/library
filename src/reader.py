@@ -391,8 +391,10 @@ class ReaderBorrowHistory(QWidget):
 
     def showHistory(self):
         history = database.get_borrow_list(self.UID, False)
-        print(history)
+        # print(history)
         self.table = QTableWidget(1, 5)
+        self.table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setVisible(False)
@@ -423,15 +425,30 @@ class ReaderBorrowHistory(QWidget):
         itemNAME.setTextAlignment(Qt.AlignCenter)
         itemBorrowDate = QTableWidgetItem(val[2].strftime('%Y-%m-%d'))
         itemBorrowDate.setTextAlignment(Qt.AlignCenter)
-        itemReturnDate = QTableWidgetItem(
-            val[3].strftime('%Y-%m-%d') if val[3] is not None else "未归还")
+        itemBorrowDate_msg = ""
+        if val[3] is None:
+            itemBorrowDate_msg = "未归还"
+        elif val[3] < datetime.date.today():
+            itemBorrowDate_msg = val[3].strftime('%Y-%m-%d')
+        else:
+            itemBorrowDate_msg = "最晚" + val[3].strftime('%Y-%m-%d')
+        itemReturnDate = QTableWidgetItem(itemBorrowDate_msg)
         itemReturnDate.setTextAlignment(Qt.AlignCenter)
         self.table.insertRow(1)
         self.table.setItem(1, 0, itemBID)
         self.table.setItem(1, 1, itemNAME)
         self.table.setItem(1, 2, itemBorrowDate)
         self.table.setItem(1, 3, itemReturnDate)
-        if val[3] is None:
+        # 检查这本书是否在自己手里超期
+        tle_msg = sum([
+            1 if info[0] == self.UID else 0
+            for info in database.get_violation_list(val[0], True)
+        ])
+        # 需要还书的逻辑：
+        # 1. 在自己手里超期
+        # 2. 还书日期不存在
+        # 3. 还书日期在当前日子之后
+        if tle_msg > 0 or (val[3] is None or val[3] > datetime.date.today()):
             itemBorrow = QToolButton(self.table)
             itemBorrow.setFixedSize(75, 25)
             itemBorrow.setText("归还")
@@ -444,7 +461,7 @@ class ReaderBorrowHistory(QWidget):
             self.table.setCellWidget(1, 4, itemWidget)
 
     # 待完成
-    def returnBook(self,BID: str):
+    def returnBook(self, BID: str):
         database.return_book(BID, self.UID)
 
     def initUI(self):
