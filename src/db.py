@@ -171,7 +171,7 @@ def db_init_data(cursor):
                                            or init_cmd.strip().startswith('-'))
     ]
     for init_cmd in init_cmds:
-        print('execing:', init_cmd)
+        # print('execing:', init_cmd)
         cursor.execute(init_cmd)
     return
     # 以下为原来的代码
