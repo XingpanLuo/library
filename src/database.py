@@ -1063,6 +1063,16 @@ def borrow_book(BID: str, SID: str) -> bool:
         INSERT
         INTO borrow
         VALUES('{SID}', '{BID}', '{BORROW_DATE}', '{DEADLINE}')''')
+        cursor.execute(f'''
+        DELETE
+        FROM reserve
+        WHERE reader_ID=%s AND book_ID=%s
+                ''', (SID, BID))
+        cursor.execute(f'''
+        UPDATE book
+        SET borrow_Times = borrow_Times + 1
+        WHERE ID = %s 
+        ''', BID)
         conn.commit()
 
     except Exception as e:
