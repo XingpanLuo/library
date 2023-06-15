@@ -124,8 +124,8 @@ def db_init_table(cursor):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS book(
         ID char(8) PRIMARY KEY,
-        name varchar(10),
-        author varchar(10),
+        name varchar(40),
+        author varchar(20),
         price float,
         status int,
         borrow_Times int,
