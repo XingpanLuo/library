@@ -8,8 +8,9 @@ CONFIG = {
     "db": 'library'
 }
 
+
 def create_procedure_add_book(cursor):
-    sql='''
+    sql = '''
     CREATE PROCEDURE add_book (
         IN book_id CHAR(8),
         IN book_name VARCHAR(10),
@@ -32,9 +33,10 @@ def create_procedure_add_book(cursor):
     END;
     '''
     cursor.execute(sql)
-    
+
+
 def create_procedure_delete_book(cursor):
-    sql='''
+    sql = '''
     CREATE PROCEDURE delete_book (
         IN book_id CHAR(8),
         OUT result BOOL,
@@ -63,9 +65,10 @@ def create_procedure_delete_book(cursor):
     END;
     '''
     cursor.execute(sql)
-    
+
+
 def create_borrow_view(cursor):
-    sql='''
+    sql = '''
     CREATE VIEW borrow_view AS
     SELECT b.reader_ID, r.name as reader_Name,b.book_ID,  bk.name as book_Name, b.borrow_Date, b.return_Date
     FROM borrow b
@@ -73,9 +76,10 @@ def create_borrow_view(cursor):
     JOIN book bk ON b.book_ID = bk.ID;
     '''
     cursor.execute(sql)
-    
+
+
 def create_reserve_view(cursor):
-    sql='''
+    sql = '''
     CREATE VIEW reserve_view AS
     SELECT b.reader_ID, r.name as reader_Name,b.book_ID,  bk.name as book_Name, b.reserve_Date, b.take_Date
     FROM reserve b
@@ -83,9 +87,10 @@ def create_reserve_view(cursor):
     JOIN book bk ON b.book_ID = bk.ID;
     '''
     cursor.execute(sql)
-    
+
+
 def create_violation_view(cursor):
-    sql='''
+    sql = '''
     CREATE VIEW violation_view AS
     SELECT b.reader_ID, r.name as reader_Name,b.book_ID,  bk.name as book_Name, b.borrow_Date
     FROM violation b
@@ -93,7 +98,7 @@ def create_violation_view(cursor):
     JOIN book bk ON b.book_ID = bk.ID;
     '''
     cursor.execute(sql)
-    
+
 
 def db_init_table(cursor):
     cursor.execute('''
@@ -156,8 +161,20 @@ def db_init_table(cursor):
         PRIMARY KEY(reader_ID, book_ID, borrow_Date)
     );
     ''')
-    
+
+
 def db_init_data(cursor):
+    # 提交14的新代码
+    init_cmds = [
+        init_cmd.strip() for init_cmd in open('src/init.sql').read().split(';')
+        if init_cmd.strip() != '' and not (init_cmd.strip().startswith('#')
+                                           or init_cmd.strip().startswith('-'))
+    ]
+    for init_cmd in init_cmds:
+        print('execing:', init_cmd)
+        cursor.execute(init_cmd)
+    return
+    # 以下为原来的代码
     # master
     cursor.execute('''
     INSERT
@@ -208,7 +225,7 @@ def db_init_data(cursor):
     INTO reserve(reader_ID,book_ID,reserve_Date,take_Date)
     VALUES('r2','b1','2023-4-8','2023-6-9') 
     ''')
-    
+
     cursor.execute('''
     INSERT
     INTO reserve(reader_ID,book_ID,reserve_Date)
@@ -220,4 +237,3 @@ def db_init_data(cursor):
     INTO violation(reader_ID,book_ID,borrow_Date)
     VALUES('r1','b1','2023-2-9') 
     ''')
-

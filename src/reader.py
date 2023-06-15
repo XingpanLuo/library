@@ -146,7 +146,7 @@ class readerPage(QWidget):
         pages = [
             BookSearch(self.info['ID']),
             ReaderBorrowHistory(self.info['ID']),
-            SelfInfo(self.info['ID'],self)
+            SelfInfo(self.info['ID'], self)
         ]
         if self.content is not None:
             self.content.deleteLater()
@@ -251,6 +251,15 @@ class BookSearch(QGroupBox):
     def insertRow(self, val: list):
         print(val)
         borrowinfo = database.get_borrow_list(val[0], True)
+        # 权宜之计
+        if len(borrowinfo) > 0:
+            borrowinfo = borrowinfo[0]
+        print(borrowinfo)
+        # 是否被本人借阅
+        is_rent_by_self = False
+        if len(borrowinfo) > 0 and borrowinfo[0] == self.SID:
+            is_rent_by_self = True
+
         itemBID = QTableWidgetItem(val[0])
         itemBID.setTextAlignment(Qt.AlignCenter)
 
@@ -278,20 +287,26 @@ class BookSearch(QGroupBox):
         itemSUM = QTableWidgetItem(str(val[5]))
         itemSUM.setTextAlignment(Qt.AlignCenter)
 
+        itemBorrow_exist = False
         itemBorrow = QToolButton(self.table)
         itemBorrow.setFixedSize(75, 25)
-        if val[4] == 0:
+        if val[4] == 0 and is_rent_by_self is False:
+            itemBorrow_exist = True
             itemBorrow.setText('借阅')
             itemBorrow.clicked.connect(
                 lambda: self.updateBorrowFunction(val[0]))
-        else:
+        elif val[4] == 1 and is_rent_by_self is False:
+            itemBorrow_exist = True
             itemBorrow.setText('预约')
             itemBorrow.clicked.connect(
                 lambda: self.updateReserveFunction(val[0]))
 
         itemLayout = QHBoxLayout()
         itemLayout.setContentsMargins(0, 0, 0, 0)
-        itemLayout.addWidget(itemBorrow)
+        if itemBorrow_exist is True:
+            itemLayout.addWidget(itemBorrow)
+        else:
+            itemBorrow.setVisible(False)
         itemWidget = QWidget()
         itemWidget.setLayout(itemLayout)
 
@@ -409,9 +424,9 @@ class ReaderBorrowHistory(QWidget):
 
 class SelfInfo(QWidget):
 
-    def __init__(self, SID: str,parent):
+    def __init__(self, SID: str, parent):
         super().__init__()
-        self.parent=parent
+        self.parent = parent
         self.SID = SID
         self.bodyLayout = QVBoxLayout()
         self.show_page()
@@ -563,7 +578,7 @@ class SelfInfo(QWidget):
                                  QMessageBox.NoButton, self)
             msgBox.addButton("确认", QMessageBox.AcceptRole)
             msgBox.exec_()
-        
+
         self.parent.switch(2, self)
 
     def initUI(self):

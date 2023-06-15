@@ -1046,7 +1046,7 @@ def borrow_book(BID: str, SID: str) -> bool:
         cursor.execute(f'''
         INSERT
         INTO borrow
-        VALUES('{BID}', '{SID}', '{BORROW_DATE}', '{DEADLINE}')''')
+        VALUES('{SID}', '{BID}', '{BORROW_DATE}', '{DEADLINE}')''')
         conn.commit()
 
     except Exception as e:
