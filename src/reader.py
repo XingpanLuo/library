@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QGroupBox, QToolButton,
 from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt, QSize
 from src import database
+
+
 # from src import reader_information
 # from src import book_information
 # import database
@@ -329,7 +331,20 @@ class BookSearch(QGroupBox):
 
     # 待完成
     def updateReserveFunction(self, BID: str):
-        pass
+        print(BID)
+        res = database.reserve(self.SID, BID)
+        if res is True:
+            msgBox = QMessageBox(QMessageBox.Information, "成功", '已预约',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+        else:
+            msgBox = QMessageBox(QMessageBox.Warning, "错误", '预约失败',
+                                 QMessageBox.NoButton, self)
+            msgBox.addButton("确认", QMessageBox.AcceptRole)
+            msgBox.exec_()
+        self.searchFunction()
+        return
 
     # def updateBook(self, book_info: dict):
     #     change = self.sum - book_info['SUM']

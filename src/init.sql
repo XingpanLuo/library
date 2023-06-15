@@ -9,7 +9,7 @@ VALUES(
 		'./headshot/default.jpg'
 	);
 -- # book;
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b1', 'DB archive', 'Ullman', 59.0, 4, 2,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b1', 'DB archive', 'Ullman', 59.0, 1, 2,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b2', 'DB concepts', 'Abraham', 59.0, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b3', 'C++ Primer', 'Stanley', 78.6, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b4', 'Redis design and archive', 'HUANG JIANHONG', 79.0, 0, 0,0);
@@ -25,7 +25,7 @@ insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) va
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b14', 'Perl&MySQL', 'Xu Zeping', 23.0, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b15', 'Shadows', 'John', 1919.0, 0, 0,0);
 insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b16', 'Taste Welcome Wine', 'WoXiuYuan', 810.0, 0, 0,0);
-insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b17', 'Sleepy red tea', 'Tiansuo Haoer', 114.0, 0, 0,0);
+insert into Book(ID, name, author, price, status, borrow_Times,reserve_Times) values('b17', 'Sleepy red tea', 'Tiansuo Haoer', 114.0, 1, 0,0);
 
 -- # reader;
 INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r1','lihua','a@qq.com','r1','./headshot/r1.png');
@@ -40,6 +40,7 @@ INSERT INTO reader(ID, name, email, pwd, headshot)VALUES('r8','c','h@ustc.edu.cn
 -- # borrow;
 INSERT INTO borrow(reader_ID, book_ID, borrow_Date)VALUES('r1', 'b1', '2023-2-9');
 INSERT INTO borrow(reader_ID, book_ID, borrow_Date, return_Date)VALUES('r2', 'b1', '2023-6-8', '2023-6-30');
+INSERT INTO borrow(reader_ID, book_ID, borrow_Date)VALUES('r6', 'b17', '2023-6-10');
 -- # reserve;
 INSERT INTO reserve(reader_ID, book_ID, reserve_Date)VALUES('r1', 'b2', '2023-6-12');
 -- # violation;
