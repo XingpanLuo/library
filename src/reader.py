@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QGroupBox, QToolButton,
 from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import Qt, QSize
 from src import database
-
+import datetime
 
 # from src import reader_information
 # from src import book_information
@@ -51,20 +51,15 @@ class readerPage(QWidget):
         self.bodyLayout.addWidget(self.body, 1, 0, 7, 7)
         self.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.bodyLayout)
-        
+
         self.setMyStyle()
 
     def errorBox(self, mes: str):
-        msgBox = QMessageBox(
-            QMessageBox.Warning,
-            "警告!",
-            mes,
-            QMessageBox.NoButton,
-            self
-        )
+        msgBox = QMessageBox(QMessageBox.Warning, "警告!", mes,
+                             QMessageBox.NoButton, self)
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.exec_()
-        
+
     # 设置标题栏
     def setTitleBar(self):
         self.title = QLabel()
@@ -273,13 +268,18 @@ class BookSearch(QGroupBox):
 
     # 插入行
     def insertRow(self, val: list):
-        # 检测是否是本人借的或预约的
+        # 检测是否是本人借的
         is_rent_by_self = False
         for _borrowinfo in database.get_borrow_list(val[0], True):
-            if _borrowinfo[0] == self.SID:
+            # 借阅记录是自己的而且没还
+            if _borrowinfo[0] == self.SID and (
+                    _borrowinfo[-1] is None
+                    or _borrowinfo[-1] > datetime.date.today()):
                 is_rent_by_self = True
+        # 检测是否是本人预约的
         is_reserve_by_self = False
         for _reserveinfo in database.get_reserve_list(val[0], True):
+            # 预约记录是自己的
             if _reserveinfo[0] == self.SID:
                 is_reserve_by_self = True
 
@@ -370,18 +370,6 @@ class BookSearch(QGroupBox):
             msgBox.exec_()
         self.searchFunction()
         return
-
-    # def updateBook(self, book_info: dict):
-    #     change = self.sum - book_info['SUM']
-    #     # 书本减少的数量不能大于未借出的书本数
-    #     if change > book_info['NUM']:
-    #         book_info['SUM'] = self.sum - book_info['NUM']
-    #         book_info['NUM'] = 0
-    #     else:
-    #         book_info['NUM'] -= change
-    #     ans = database.update_book(book_info)
-    #     if ans:
-    #         self.searchFunction()
 
     def initUI(self):
         self.setFixedSize(1100, 600)
@@ -589,23 +577,12 @@ class SelfInfo(QWidget):
             e.setText('')
 
     def chooseHeadFile(self):
-        while True:
-            image_file, _ = QFileDialog.getOpenFileName(
-                self, 'Open file', './headshot',
-                'Image files (*.jpg *.gif *.png *.jpeg)')
-            if False:  # not image_file.startswith(os.getcwd()):# 看起来检测路径貌似并不容易
-                msgBox = QMessageBox(QMessageBox.Warning, "错误!",
-                                     '头像文件必须在指定目录下!', QMessageBox.NoButton,
-                                     self)
-                msgBox.addButton("确认", QMessageBox.AcceptRole)
-                msgBox.exec_()
-                continue
-            else:
-                # 为了兼容windows做了一点修改
-                image_file = image_file.replace("\\", "/")
-                image_file = "./headshot/" + image_file.split('/')[-1]
-                self.stu_info['headshot'] = image_file
-                return
+        # 实现chooseHeadFile方法，用于选择头像文件
+        filePath, fileType = QFileDialog.getOpenFileName(
+            self, '选择文件', '.', 'Image files(*.png *.jpg *.jpeg *.bmp)')
+        self.headInput.setText(filePath)
+        self.stu_info['headshot'] = filePath
+        self.headInput.setText(str(self.stu_info['headshot']))
 
     def submitFunction(self):
         submit_state = 0
