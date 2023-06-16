@@ -1,13 +1,12 @@
 import time
 import pymysql
 import pymysql.cursors
-import random
-from datetime import datetime,timedelta
-
+# import random
+import datetime
 
 try:
     from src import db
-except:
+except ...:
     import db
 
 CONFIG = {
@@ -239,19 +238,27 @@ def signin(user_message: dict) -> dict:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
-        ## 每次登录时，查阅
-        cursor.execute("SELECT reader_ID,book_ID, borrow_Date,return_Date FROM borrow WHERE return_Date is NULL")
+        # 每次登录时，查阅
+        cursor.execute(
+            "SELECT reader_ID,book_ID, borrow_Date,return_Date FROM borrow WHERE return_Date is NULL"
+        )
         # 将读者加入到违期表中
-        for reader_ID, book_ID,borrow_Date,return_Date in cursor.fetchall():
-            # print(reader_ID, book_ID,borrow_Date,return_Date)
-            if datetime.now().date() - borrow_Date > timedelta(days=60) and return_Date is None:
+        violation_list = cursor.fetchall()
+        for reader_ID, book_ID, borrow_Date, return_Date in violation_list:
+            now_time = datetime.datetime.today().date()
+            ddl = borrow_Date + datetime.timedelta(days=60)
+            if (now_time > ddl) and return_Date is None:
                 # 检查是否已经存在记录
-                cursor.execute("SELECT * FROM violation WHERE reader_ID = %s AND book_ID = %s", (reader_ID, book_ID))
+                cursor.execute(
+                    "SELECT * FROM violation WHERE reader_ID=%s AND book_ID=%s",
+                    (reader_ID, book_ID))
                 record = cursor.fetchone()
-            if record is None:
-                # 如果不存在记录，执行插入操作
-                cursor.execute("INSERT INTO violation (reader_ID,book_ID,borrow_Date) VALUES (%s,%s,%s)", (reader_ID,book_ID,borrow_Date.strftime('%Y-%m-%d')))
-       
+                if record is None:
+                    # 如果不存在记录，执行插入操作
+                    cursor.execute(
+                        "INSERT INTO violation (reader_ID,book_ID,borrow_Date) VALUES (%s,%s,%s)",
+                        (reader_ID, book_ID, borrow_Date.strftime('%Y-%m-%d')))
+
         cursor.execute(
             '''
         SELECT ID
@@ -715,10 +722,8 @@ def return_book(bid: str, rid: str) -> bool:
         FROM book, borrow
         WHERE reader_ID=%s AND borrow.book_ID=%s AND borrow.book_ID=book.ID
         ''', (rid, bid))
-        book_mes = cursor.fetchall()
-        print(book_mes)
-        BACK_DATE = datetime.now().date()
-        print(BACK_DATE)
+        # book_mes = cursor.fetchall()
+        BACK_DATE = datetime.datetime.now().date()
         # book表内NUM加一，删除borrowing_book表内的记录，把记录插入log表
         # new 更新借阅表中的记录，删除违期表中的记录
         cursor.execute(
@@ -806,7 +811,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                 FROM log, book
                 WHERE log.BID=%s AND book.BID=log.BID
                 ORDER BY BACK_DATE
-            ''', (ID,))
+            ''', (ID, ))
         else:
             cursor.execute(
                 '''
@@ -814,7 +819,7 @@ def get_log(ID: str, BID: bool = False) -> list:
                 FROM log, book
                 WHERE SID=%s AND book.BID=log.BID
                 ORDER BY BACK_DATE
-            ''', (ID,))
+            ''', (ID, ))
         res = cursor.fetchall()
     except Exception as e:
         print('get log error!')
@@ -994,7 +999,7 @@ def delete_book(ID: str):
             conn.commit()
 
         return result_bool, result_str
-    except:
+    except ...:
         conn.rollback()
         raise
     finally:
@@ -1083,15 +1088,17 @@ def borrow_book(BID: str, SID: str) -> bool:
         INSERT
         INTO borrow (reader_ID,book_ID,borrow_Date)
         VALUES('{SID}', '{BID}', '{BORROW_DATE}')''')
-        cursor.execute(f'''
+        cursor.execute(
+            '''
         DELETE
         FROM reserve
         WHERE reader_ID=%s AND book_ID=%s
                 ''', (SID, BID))
-        cursor.execute(f'''
+        cursor.execute(
+            '''
         UPDATE book
         SET borrow_Times = borrow_Times + 1
-        WHERE ID = %s 
+        WHERE ID = %s
         ''', BID)
         conn.commit()
 
