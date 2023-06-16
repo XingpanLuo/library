@@ -2,10 +2,10 @@ import sys
 from PyQt5.QtWidgets import (QApplication, QVBoxLayout, QLabel, QLineEdit,
                              QToolButton, QGroupBox, QMessageBox)
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QIcon
+# from PyQt5.QtGui import QIcon
 try:
     from src import database
-except:
+except ModuleNotFoundError:
     import database
 
 

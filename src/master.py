@@ -15,7 +15,7 @@ try:
     import book_information
     import reader_information
     # import reader
-except ...:
+except ModuleNotFoundError:
     from src import database
     from src import book_information
     from src import reader_information
@@ -675,13 +675,13 @@ class BorrowManage(QWidget):
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
-        except ...:
+        except AttributeError:
             itemBorrowTime = QTableWidgetItem('NULL')
         lastTime = val[4] + datetime.timedelta(days=60)
         itemBorrowTime.setTextAlignment(Qt.AlignCenter)
         try:
             itemReturnTime = QTableWidgetItem(val[5].strftime('%Y-%m-%d'))
-        except ...:
+        except AttributeError:
             itemReturnTime = QTableWidgetItem("最晚" +
                                               lastTime.strftime('%Y-%m-%d'))
         itemReturnTime.setTextAlignment(Qt.AlignCenter)
@@ -841,12 +841,12 @@ class ReserveManage(QWidget):
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
-        except ...:
+        except AttributeError:
             itemBorrowTime = QTableWidgetItem('NULL')
         itemBorrowTime.setTextAlignment(Qt.AlignCenter)
         try:
             itemReturnTime = QTableWidgetItem(val[5].strftime('%Y-%m-%d'))
-        except ...:
+        except AttributeError:
             itemReturnTime = QTableWidgetItem('NULL')
         itemReturnTime.setTextAlignment(Qt.AlignCenter)
 
@@ -994,7 +994,7 @@ class ViolationManage(QWidget):
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
-        except ...:
+        except AttributeError:
             itemBorrowTime = QTableWidgetItem('NULL')
         itemBorrowTime.setTextAlignment(Qt.AlignCenter)
 

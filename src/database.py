@@ -6,7 +6,7 @@ import datetime
 
 try:
     from src import db
-except ...:
+except ModuleNotFoundError:
     import db
 
 CONFIG = {
@@ -996,7 +996,7 @@ def delete_book(ID: str):
             conn.commit()
 
         return result_bool, result_str
-    except ...:
+    except:
         conn.rollback()
         raise
     finally:
