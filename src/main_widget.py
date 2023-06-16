@@ -52,7 +52,7 @@ class MainWindow(QWidget):
             self.login.setVisible(False)
             self.display()
         else:
-            self.errorBox('登录失败')
+            self.errorBox('账号或密码错误,登录失败')
             print('登录失败!')
 
     # 显示注册界面
