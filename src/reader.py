@@ -202,15 +202,19 @@ class BookSearch(QGroupBox):
         self.is_tle = False if len(
             database.get_violation_list(SID)) == 0 else True
         # 检测是否超过借阅数目
-        self.is_cle = True if sum([
-            1 if data[-1] is None else 0
-            for data in database.get_borrow_list(SID)
-        ]) >= 3 else False
+        self.is_cle = self.check_cle()
         self.setSearchBar()
         self.searchFunction()
 
         self.setLayout(self.body)
         self.initUI()
+
+    # 检测是否超出借阅限制
+    def check_cle(self):
+        return True if sum([
+            1 if data[-1] is None else 0
+            for data in database.get_borrow_list(self.SID)
+        ]) >= 3 else False
 
     # 设置搜索框
     def setSearchBar(self):
@@ -251,6 +255,7 @@ class BookSearch(QGroupBox):
 
     # 设置表格
     def setTable(self):
+        self.is_cle = self.check_cle()
         self.table = QTableWidget(1, 7)
         self.table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeToContents)
