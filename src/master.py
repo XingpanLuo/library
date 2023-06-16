@@ -65,16 +65,16 @@ class AdministratorPage(QWidget):
         self.out.setText('退出')
         self.out.setFixedHeight(30)
         
-        self.headshot_ = QLabel(self)
-        self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
-        self.headshot_.setPixmap(self.headshot)
-        self.headshot_.resize(200, 200)
+        # self.headshot_ = QLabel(self)
+        # self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
+        # self.headshot_.setPixmap(self.headshot)
+        # self.headshot_.resize(200, 200)
 
         titleLayout = QHBoxLayout()
         titleLayout.addSpacing(100)
         titleLayout.addWidget(self.title)
         titleLayout.addSpacing(700)
-        titleLayout.addWidget(self.headshot_)
+        # titleLayout.addWidget(self.headshot_)
         titleLayout.addWidget(self.account)
         titleLayout.addWidget(self.out)
         self.titleBar.setLayout(titleLayout)
@@ -156,10 +156,10 @@ class AdministratorPage(QWidget):
         self.focus = index
         self.setContent()
         
-    def setHeadshot(self, headshotPath):
-        self.headshot = QPixmap(headshotPath).scaled(50, 50)
-        self.headshot_.setPixmap(self.headshot)
-        self.update()
+    # def setHeadshot(self, headshotPath):
+    #     self.headshot = QPixmap(headshotPath).scaled(50, 50)
+    #    self.headshot_.setPixmap(self.headshot)
+    #    self.update()
         
     # 设置右侧信息页
     def setContent(self):
@@ -1039,8 +1039,8 @@ class SelfInfo(QWidget):
         self.email = QLabel()
         self.email.setText('邮箱')
 
-        self.headname = QLabel()
-        self.headname.setText('头像')
+        # self.headname = QLabel()
+        # self.headname.setText('头像')
 
         self.pwd = QLabel()
         self.pwd.setText('密码')
@@ -1072,19 +1072,19 @@ class SelfInfo(QWidget):
                                                                     emailInput)
 
         # 头像
-        self.headInput = QLineEdit()
-        self.headInput.setFixedSize(400, 40)
-        self.headInput.setText(str(self.stu_info['headshot']))
-        self.headInput.initText = '请输入头像路径'
-        self.headInput.setTextMargins(5, 5, 5, 5)
-        self.headInput.setEnabled(True)
-        self.headInput.mousePressEvent = lambda x: self.chooseHeadFile()
+        # self.headInput = QLineEdit()
+        # self.headInput.setFixedSize(400, 40)
+        # self.headInput.setText(str(self.stu_info['headshot']))
+        # self.headInput.initText = '请输入头像路径'
+        # self.headInput.setTextMargins(5, 5, 5, 5)
+        # self.headInput.setEnabled(True)
+        # self.headInput.mousePressEvent = lambda x: self.chooseHeadFile()
         
         # 头像
-        self.headshot_ = QLabel(self)
-        self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
-        self.headshot_.setPixmap(self.headshot)
-        self.headshot_.resize(200, 200)
+        # self.headshot_ = QLabel(self)
+        # self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
+        # self.headshot_.setPixmap(self.headshot)
+        # self.headshot_.resize(200, 200)
 
         # 密码
         self.passwordInput = QLineEdit()
@@ -1113,16 +1113,16 @@ class SelfInfo(QWidget):
         self.submit.clicked.connect(self.submitFunction)
 
         self.btnList = [
-            self.SIDInput, self.nameInput, self.emailInput, self.headInput,
+            self.SIDInput, self.nameInput, self.emailInput,
             self.passwordInput, self.repPasswordInput
         ]
 
         self.lableList = [
-            self.rid, self.rname, self.email, self.headname, self.pwd,
+            self.rid, self.rname, self.email, self.pwd,
             self.repwd
         ]
 
-        self.bodyLayout.addWidget(self.headshot_)
+        # self.bodyLayout.addWidget(self.headshot_)
         self.bodyLayout.addWidget(self.title)
         for i in range(0, len(self.btnList)):
             self.bodyLayout.addWidget(self.lableList[i])
@@ -1165,12 +1165,12 @@ class SelfInfo(QWidget):
           
     def submitFunction(self):
         submit_state = 0
-        if os.path.exists(self.headInput.text()) is False:
-            msgBox = QMessageBox(QMessageBox.Warning, "错误!", '头像文件不存在!',
-                                 QMessageBox.NoButton, self)
-            msgBox.addButton("确认", QMessageBox.AcceptRole)
-            msgBox.exec_()
-            return
+        # if os.path.exists(self.headInput.text()) is False:
+        #     msgBox = QMessageBox(QMessageBox.Warning, "错误!", '头像文件不存在!',
+        #                          QMessageBox.NoButton, self)
+        #     msgBox.addButton("确认", QMessageBox.AcceptRole)
+        #     msgBox.exec_()
+        #     return
         if self.passwordInput.text() != self.passwordInput.initText:
             submit_state = 1
             if self.passwordInput.text() != self.repPasswordInput.text():
@@ -1194,7 +1194,7 @@ class SelfInfo(QWidget):
                                  QMessageBox.NoButton, self)
             msgBox.addButton("确认", QMessageBox.AcceptRole)
             msgBox.exec_()
-        self.parent.setHeadshot(self.stu_info['headshot'])
+        # self.parent.setHeadshot(self.stu_info['headshot'])
         self.parent.switch(5, self)
 
     def initUI(self):
