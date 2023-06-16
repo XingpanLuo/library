@@ -76,7 +76,7 @@ class AdministratorPage(QWidget):
         titleLayout.addSpacing(100)
         titleLayout.addWidget(self.title)
         titleLayout.addSpacing(700)
-        # titleLayout.addWidget(self.headshot_)
+        titleLayout.addWidget(self.headshot_)
         titleLayout.addWidget(self.account)
         titleLayout.addWidget(self.out)
         self.titleBar.setLayout(titleLayout)
@@ -159,10 +159,10 @@ class AdministratorPage(QWidget):
         self.focus = index
         self.setContent()
 
-    # def setHeadshot(self, headshotPath):
-    #     self.headshot = QPixmap(headshotPath).scaled(50, 50)
-    #    self.headshot_.setPixmap(self.headshot)
-    #    self.update()
+    def setHeadshot(self, headshotPath):
+        self.headshot = QPixmap(headshotPath).scaled(50, 50)
+        self.headshot_.setPixmap(self.headshot)
+        self.update()
 
     # 设置右侧信息页
     def setContent(self):
@@ -1051,8 +1051,8 @@ class SelfInfo(QWidget):
         self.email = QLabel()
         self.email.setText('邮箱')
 
-        # self.headname = QLabel()
-        # self.headname.setText('头像')
+        self.headname = QLabel()
+        self.headname.setText('头像')
 
         self.pwd = QLabel()
         self.pwd.setText('密码')
@@ -1084,19 +1084,19 @@ class SelfInfo(QWidget):
                                                                     emailInput)
 
         # 头像
-        # self.headInput = QLineEdit()
-        # self.headInput.setFixedSize(400, 40)
-        # self.headInput.setText(str(self.stu_info['headshot']))
-        # self.headInput.initText = '请输入头像路径'
-        # self.headInput.setTextMargins(5, 5, 5, 5)
-        # self.headInput.setEnabled(True)
-        # self.headInput.mousePressEvent = lambda x: self.chooseHeadFile()
+        self.headInput = QLineEdit()
+        self.headInput.setFixedSize(400, 40)
+        self.headInput.setText(str(self.stu_info['headshot']))
+        self.headInput.initText = '请输入头像路径'
+        self.headInput.setTextMargins(5, 5, 5, 5)
+        self.headInput.setEnabled(True)
+        self.headInput.mousePressEvent = lambda x: self.chooseHeadFile()
 
         # 头像
-        # self.headshot_ = QLabel(self)
-        # self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
-        # self.headshot_.setPixmap(self.headshot)
-        # self.headshot_.resize(200, 200)
+        self.headshot_ = QLabel(self)
+        self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
+        self.headshot_.setPixmap(self.headshot)
+        self.headshot_.resize(200, 200)
 
         # 密码
         self.passwordInput = QLineEdit()
@@ -1125,15 +1125,15 @@ class SelfInfo(QWidget):
         self.submit.clicked.connect(self.submitFunction)
 
         self.btnList = [
-            self.SIDInput, self.nameInput, self.emailInput, self.passwordInput,
+            self.SIDInput, self.nameInput, self.emailInput,self.headInput, self.passwordInput,
             self.repPasswordInput
         ]
 
         self.lableList = [
-            self.rid, self.rname, self.email, self.pwd, self.repwd
+            self.rid, self.rname, self.email,self.headname, self.pwd, self.repwd
         ]
 
-        # self.bodyLayout.addWidget(self.headshot_)
+        self.bodyLayout.addWidget(self.headshot_)
         self.bodyLayout.addWidget(self.title)
         for i in range(0, len(self.btnList)):
             self.bodyLayout.addWidget(self.lableList[i])
@@ -1147,26 +1147,6 @@ class SelfInfo(QWidget):
         if e.text() == e.initText:
             e.setText('')
 
-    # def chooseHeadFile(self):
-    #     while True:
-    #         image_file, _ = QFileDialog.getOpenFileName(
-    #             self, 'Open file', './headshot',
-    #             'Image files (*.jpg *.gif *.png *.jpeg)')
-    #         if False:  # not image_file.startswith(os.getcwd()):# 看起来检测路径貌似并不容易
-    #             msgBox = QMessageBox(QMessageBox.Warning, "错误!",
-    #                                  '头像文件必须在指定目录下!', QMessageBox.NoButton,
-    #                                  self)
-    #             msgBox.addButton("确认", QMessageBox.AcceptRole)
-    #             msgBox.exec_()
-    #             continue
-    #         else:
-    #             # 为了兼容windows做了一点修改
-    #             image_file = image_file.replace("\\", "/")
-    #             image_file = "./headshot/" + image_file.split('/')[-1]
-    #             print(image_file)
-    #             self.stu_info['headshot'] = image_file
-    #             self.headInput.setText(str(self.stu_info['headshot']))
-    #             return
     def chooseHeadFile(self):
         # 实现chooseHeadFile方法，用于选择头像文件
         filePath, fileType = QFileDialog.getOpenFileName(
@@ -1207,7 +1187,7 @@ class SelfInfo(QWidget):
                                  QMessageBox.NoButton, self)
             msgBox.addButton("确认", QMessageBox.AcceptRole)
             msgBox.exec_()
-        # self.parent.setHeadshot(self.stu_info['headshot'])
+        self.parent.setHeadshot(self.stu_info['headshot'])
         self.parent.switch(5, self)
 
     def initUI(self):
