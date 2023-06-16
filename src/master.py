@@ -1,13 +1,13 @@
 import sys
-import time
-import os
+# import time
+# import os
 import datetime
 from PyQt5.QtWidgets import (QApplication, QWidget, QGridLayout, QGroupBox,
                              QToolButton, QSplitter, QVBoxLayout, QHBoxLayout,
                              QLabel, QTableWidget, QTableWidgetItem,
-                             QAbstractItemView, QLineEdit, QFileDialog,
-                             QMessageBox, QComboBox)
-from PyQt5.QtGui import QIcon, QFont,QPixmap
+                             QHeaderView, QAbstractItemView, QLineEdit,
+                             QFileDialog, QMessageBox, QComboBox)
+from PyQt5.QtGui import QFont,QPixmap
 from PyQt5.QtCore import Qt, QSize
 
 try:
@@ -15,7 +15,7 @@ try:
     import book_information
     import reader_information
     # import reader
-except:
+except ...:
     from src import database
     from src import book_information
     from src import reader_information
@@ -76,7 +76,7 @@ class AdministratorPage(QWidget):
         titleLayout.addSpacing(100)
         titleLayout.addWidget(self.title)
         titleLayout.addSpacing(700)
-        titleLayout.addWidget(self.headshot_)
+        # titleLayout.addWidget(self.headshot_)
         titleLayout.addWidget(self.account)
         titleLayout.addWidget(self.out)
         self.titleBar.setLayout(titleLayout)
@@ -106,7 +106,8 @@ class AdministratorPage(QWidget):
         self.reserveManage.setText('预约信息')
         self.reserveManage.setFixedSize(160, 50)
         self.reserveManage.setIconSize(QSize(30, 30))
-        self.reserveManage.clicked.connect(lambda: self.switch(2, self.reserveManage))
+        self.reserveManage.clicked.connect(
+            lambda: self.switch(2, self.reserveManage))
         self.reserveManage.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
         self.borrowManage = QToolButton()
@@ -125,16 +126,16 @@ class AdministratorPage(QWidget):
         self.violationManage.clicked.connect(
             lambda: self.switch(4, self.borrowManage))
         self.borrowManage.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
-        
+
         self.selfInfo = QToolButton()
         self.selfInfo.setText('个人信息')
         self.selfInfo.setFixedSize(160, 50)
         self.selfInfo.setIconSize(QSize(30, 30))
-        self.selfInfo.clicked.connect(
-            lambda: self.switch(5, self.selfInfo))
+        self.selfInfo.clicked.connect(lambda: self.switch(5, self.selfInfo))
         self.borrowManage.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.btnList = [
-            self.bookManage, self.userManage, self.reserveManage, self.borrowManage, self.violationManage,self.selfInfo
+            self.bookManage, self.userManage, self.reserveManage,
+            self.borrowManage, self.violationManage, self.selfInfo
         ]
 
         self.layout = QVBoxLayout()
@@ -157,12 +158,12 @@ class AdministratorPage(QWidget):
     def switch(self, index, btn):
         self.focus = index
         self.setContent()
-        
-    def setHeadshot(self, headshotPath):
-        self.headshot = QPixmap(headshotPath).scaled(50, 50)
-        self.headshot_.setPixmap(self.headshot)
-        self.update()
-        
+
+    # def setHeadshot(self, headshotPath):
+    #     self.headshot = QPixmap(headshotPath).scaled(50, 50)
+    #    self.headshot_.setPixmap(self.headshot)
+    #    self.update()
+
     # 设置右侧信息页
     def setContent(self):
         if self.content is not None:
@@ -175,10 +176,10 @@ class AdministratorPage(QWidget):
             self.content = ReserveManage()
         elif self.focus == 3:
             self.content = BorrowManage()
-        elif self.focus==4:
+        elif self.focus == 4:
             self.content = ViolationManage()
         else:
-            self.content= SelfInfo(self)
+            self.content = SelfInfo(self)
         self.body.addWidget(self.content)
 
     def setMyStyle(self):
@@ -237,7 +238,8 @@ class BookManage(QGroupBox):
     # 搜索方法
     def searchFunction(self):
         convert = {'书号': 'ID', '作者': 'AUTHOR', '书名': 'NAME'}
-        self.book_list = database.search_book(self.searchInput.text(), convert[self.selectBox.currentText()])
+        self.book_list = database.search_book(
+            self.searchInput.text(), convert[self.selectBox.currentText()])
         if self.book_list == []:
             print('未找到')
         if self.table is not None:
@@ -247,6 +249,8 @@ class BookManage(QGroupBox):
     # 设置表格
     def setTable(self):
         self.table = QTableWidget(1, 8)
+        self.table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setVisible(False)
@@ -373,13 +377,8 @@ class BookManage(QGroupBox):
         self.setFixedSize(1100, 600)
 
     def errorBox(self, mes: str):
-        msgBox = QMessageBox(
-            QMessageBox.Warning,
-            "警告!",
-            mes,
-            QMessageBox.NoButton,
-            self
-        )
+        msgBox = QMessageBox(QMessageBox.Warning, "警告!", mes,
+                             QMessageBox.NoButton, self)
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.exec_()
 
@@ -438,6 +437,8 @@ class ReaderManage(QWidget):
     # 设置表格
     def setTable(self):
         self.table = QTableWidget(1, 6)
+        self.table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setVisible(False)
@@ -539,7 +540,8 @@ class ReaderManage(QWidget):
                 msgBox.addButton("确认", QMessageBox.AcceptRole)
                 msgBox.exec_()
             else:
-                msgBox = QMessageBox(QMessageBox.Warning, "错误", '删除读者失败，请检查读者是否有未归还的图书',
+                msgBox = QMessageBox(QMessageBox.Warning, "错误",
+                                     '删除读者失败，请检查读者是否有未归还的图书',
                                      QMessageBox.NoButton, self)
                 msgBox.addButton("确认", QMessageBox.AcceptRole)
                 msgBox.exec_()
@@ -631,6 +633,8 @@ class BorrowManage(QWidget):
     # 设置表格
     def setTable(self, val: dict = None):
         self.table = QTableWidget(1, 7)
+        self.table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.setFixedHeight(500)
         self.table.verticalHeader().setVisible(False)
@@ -671,14 +675,15 @@ class BorrowManage(QWidget):
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
-        except:
+        except ...:
             itemBorrowTime = QTableWidgetItem('NULL')
-        lastTime=val[4]+datetime.timedelta(days=60)
+        lastTime = val[4] + datetime.timedelta(days=60)
         itemBorrowTime.setTextAlignment(Qt.AlignCenter)
         try:
             itemReturnTime = QTableWidgetItem(val[5].strftime('%Y-%m-%d'))
-        except:
-            itemReturnTime = QTableWidgetItem("最晚"+lastTime.strftime('%Y-%m-%d'))
+        except ...:
+            itemReturnTime = QTableWidgetItem("最晚" +
+                                              lastTime.strftime('%Y-%m-%d'))
         itemReturnTime.setTextAlignment(Qt.AlignCenter)
 
         itemLayout = QHBoxLayout()
@@ -695,18 +700,18 @@ class BorrowManage(QWidget):
         self.table.setItem(1, 5, itemReturnTime)
         self.table.setCellWidget(1, 4, itemWidget)
         print(val[5])
-        if val[5] == None:
+        if val[5] is None:
             itemBorrow = QToolButton(self.table)
             itemBorrow.setFixedSize(75, 25)
             itemBorrow.setText("归还")
-            itemBorrow.clicked.connect(lambda: self.returnBook(val[0], val[2], 0))
+            itemBorrow.clicked.connect(
+                lambda: self.returnBook(val[0], val[2], 0))
             itemLayout = QHBoxLayout()
             itemLayout.setContentsMargins(0, 0, 0, 0)
             itemLayout.addWidget(itemBorrow)
             itemWidget = QWidget()
             itemWidget.setLayout(itemLayout)
             self.table.setCellWidget(1, 6, itemWidget)
-
 
     def returnBook(self, SID: str, BID: str, isPunished: int):
         database.return_book(BID, SID)
@@ -795,6 +800,8 @@ class ReserveManage(QWidget):
     # 设置表格
     def setTable(self, val: dict = None):
         self.table = QTableWidget(1, 7)
+        self.table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.setFixedHeight(500)
         self.table.verticalHeader().setVisible(False)
@@ -834,12 +841,12 @@ class ReserveManage(QWidget):
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
-        except:
+        except ...:
             itemBorrowTime = QTableWidgetItem('NULL')
         itemBorrowTime.setTextAlignment(Qt.AlignCenter)
         try:
             itemReturnTime = QTableWidgetItem(val[5].strftime('%Y-%m-%d'))
-        except:
+        except ...:
             itemReturnTime = QTableWidgetItem('NULL')
         itemReturnTime.setTextAlignment(Qt.AlignCenter)
 
@@ -947,6 +954,8 @@ class ViolationManage(QWidget):
     # 设置表格
     def setTable(self, val: dict = None):
         self.table = QTableWidget(1, 7)
+        self.table.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeToContents)
         self.table.setContentsMargins(10, 10, 10, 10)
         self.table.setFixedHeight(500)
         self.table.verticalHeader().setVisible(False)
@@ -985,7 +994,7 @@ class ViolationManage(QWidget):
         itemBName.setTextAlignment(Qt.AlignCenter)
         try:
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
-        except:
+        except ...:
             itemBorrowTime = QTableWidgetItem('NULL')
         itemBorrowTime.setTextAlignment(Qt.AlignCenter)
 
@@ -1013,11 +1022,12 @@ class ViolationManage(QWidget):
     def initUI(self):
         self.setFixedSize(1000, 600)
 
+
 class SelfInfo(QWidget):
 
-    def __init__(self,parent):
+    def __init__(self, parent):
         super().__init__()
-        self.parent=parent
+        self.parent = parent
         self.SID = 'master'
         self.bodyLayout = QVBoxLayout()
         self.show_page()
@@ -1041,8 +1051,8 @@ class SelfInfo(QWidget):
         self.email = QLabel()
         self.email.setText('邮箱')
 
-        self.headname = QLabel()
-        self.headname.setText('头像')
+        # self.headname = QLabel()
+        # self.headname.setText('头像')
 
         self.pwd = QLabel()
         self.pwd.setText('密码')
@@ -1074,19 +1084,19 @@ class SelfInfo(QWidget):
                                                                     emailInput)
 
         # 头像
-        self.headInput = QLineEdit()
-        self.headInput.setFixedSize(400, 40)
-        self.headInput.setText(str(self.stu_info['headshot']))
-        self.headInput.initText = '请输入头像路径'
-        self.headInput.setTextMargins(5, 5, 5, 5)
-        self.headInput.setEnabled(True)
-        self.headInput.mousePressEvent = lambda x: self.chooseHeadFile()
-        
+        # self.headInput = QLineEdit()
+        # self.headInput.setFixedSize(400, 40)
+        # self.headInput.setText(str(self.stu_info['headshot']))
+        # self.headInput.initText = '请输入头像路径'
+        # self.headInput.setTextMargins(5, 5, 5, 5)
+        # self.headInput.setEnabled(True)
+        # self.headInput.mousePressEvent = lambda x: self.chooseHeadFile()
+
         # 头像
-        self.headshot_ = QLabel(self)
-        self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
-        self.headshot_.setPixmap(self.headshot)
-        self.headshot_.resize(200, 200)
+        # self.headshot_ = QLabel(self)
+        # self.headshot = QPixmap(self.stu_info['headshot']).scaled(100, 100)
+        # self.headshot_.setPixmap(self.headshot)
+        # self.headshot_.resize(200, 200)
 
         # 密码
         self.passwordInput = QLineEdit()
@@ -1115,16 +1125,15 @@ class SelfInfo(QWidget):
         self.submit.clicked.connect(self.submitFunction)
 
         self.btnList = [
-            self.SIDInput, self.nameInput, self.emailInput, self.headInput,
-            self.passwordInput, self.repPasswordInput
+            self.SIDInput, self.nameInput, self.emailInput, self.passwordInput,
+            self.repPasswordInput
         ]
 
         self.lableList = [
-            self.rid, self.rname, self.email, self.headname, self.pwd,
-            self.repwd
+            self.rid, self.rname, self.email, self.pwd, self.repwd
         ]
 
-        self.bodyLayout.addWidget(self.headshot_)
+        # self.bodyLayout.addWidget(self.headshot_)
         self.bodyLayout.addWidget(self.title)
         for i in range(0, len(self.btnList)):
             self.bodyLayout.addWidget(self.lableList[i])
@@ -1137,7 +1146,7 @@ class SelfInfo(QWidget):
                 item.setText(item.initText)
         if e.text() == e.initText:
             e.setText('')
-            
+
     # def chooseHeadFile(self):
     #     while True:
     #         image_file, _ = QFileDialog.getOpenFileName(
@@ -1160,19 +1169,21 @@ class SelfInfo(QWidget):
     #             return
     def chooseHeadFile(self):
         # 实现chooseHeadFile方法，用于选择头像文件
-        filePath, fileType = QFileDialog.getOpenFileName(self, '选择文件', './headshot', 'Image files(*.png *.jpg *.jpeg *.bmp)')
+        filePath, fileType = QFileDialog.getOpenFileName(
+            self, '选择文件', './headshot',
+            'Image files(*.png *.jpg *.jpeg *.bmp)')
         self.headInput.setText(filePath)
         self.stu_info['headshot'] = filePath
-        self.headInput.setText(str(self.stu_info['headshot']))      
-          
+        self.headInput.setText(str(self.stu_info['headshot']))
+
     def submitFunction(self):
         submit_state = 0
-        if os.path.exists(self.headInput.text()) is False:
-            msgBox = QMessageBox(QMessageBox.Warning, "错误!", '头像文件不存在!',
-                                 QMessageBox.NoButton, self)
-            msgBox.addButton("确认", QMessageBox.AcceptRole)
-            msgBox.exec_()
-            return
+        # if os.path.exists(self.headInput.text()) is False:
+        #     msgBox = QMessageBox(QMessageBox.Warning, "错误!", '头像文件不存在!',
+        #                          QMessageBox.NoButton, self)
+        #     msgBox.addButton("确认", QMessageBox.AcceptRole)
+        #     msgBox.exec_()
+        #     return
         if self.passwordInput.text() != self.passwordInput.initText:
             submit_state = 1
             if self.passwordInput.text() != self.repPasswordInput.text():
@@ -1184,7 +1195,7 @@ class SelfInfo(QWidget):
             self.stu_info['PWD'] = database.encrypt(self.passwordInput.text())
         self.stu_info['NAME'] = self.nameInput.text()
         self.stu_info['EMAIL'] = self.emailInput.text()
-        #self.stu_info['headshot'] = self.headInput.text()
+        # self.stu_info['headshot'] = self.headInput.text()
 
         if database.update_master(self.stu_info, submit_state) is True:
             msgBox = QMessageBox(QMessageBox.Information, "成功", '更新信息成功',
@@ -1196,11 +1207,12 @@ class SelfInfo(QWidget):
                                  QMessageBox.NoButton, self)
             msgBox.addButton("确认", QMessageBox.AcceptRole)
             msgBox.exec_()
-        self.parent.setHeadshot(self.stu_info['headshot'])
+        # self.parent.setHeadshot(self.stu_info['headshot'])
         self.parent.switch(5, self)
 
     def initUI(self):
         self.setFixedSize(900, 600)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
