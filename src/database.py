@@ -1,8 +1,9 @@
 import time
-import datetime
 import pymysql
 import pymysql.cursors
 import random
+from datetime import datetime,timedelta
+
 
 try:
     from src import db
@@ -238,6 +239,19 @@ def signin(user_message: dict) -> dict:
                                port=CONFIG['port'],
                                db=CONFIG['db'])
         cursor = conn.cursor()
+        ## 每次登录时，查阅
+        cursor.execute("SELECT reader_ID,book_ID, borrow_Date,return_Date FROM borrow WHERE return_Date is NULL")
+        # 将读者加入到违期表中
+        for reader_ID, book_ID,borrow_Date,return_Date in cursor.fetchall():
+            # print(reader_ID, book_ID,borrow_Date,return_Date)
+            if datetime.now().date() - borrow_Date > timedelta(days=60) and return_Date is None:
+                # 检查是否已经存在记录
+                cursor.execute("SELECT * FROM violation WHERE reader_ID = %s AND book_ID = %s", (reader_ID, book_ID))
+                record = cursor.fetchone()
+            if record is None:
+                # 如果不存在记录，执行插入操作
+                cursor.execute("INSERT INTO violation (reader_ID,book_ID,borrow_Date) VALUES (%s,%s,%s)", (reader_ID,book_ID,borrow_Date.strftime('%Y-%m-%d')))
+       
         cursor.execute(
             '''
         SELECT ID
@@ -703,7 +717,7 @@ def return_book(bid: str, rid: str) -> bool:
         ''', (rid, bid))
         book_mes = cursor.fetchall()
         print(book_mes)
-        BACK_DATE = datetime.date.today()
+        BACK_DATE = datetime.now().date()
         print(BACK_DATE)
         # book表内NUM加一，删除borrowing_book表内的记录，把记录插入log表
         # new 更新借阅表中的记录，删除违期表中的记录
@@ -1055,7 +1069,7 @@ def borrow_book(BID: str, SID: str) -> bool:
                                db=CONFIG['db'])
         cursor = conn.cursor()
         BORROW_DATE = time.strftime("%Y-%m-%d-%H:%M")
-        DEADLINE = postpone(BORROW_DATE)
+        # DEADLINE = postpone(BORROW_DATE)
 
         # book表内NUM减一，新建borrowing_book表内的记录
         cmdline = f'''
@@ -1067,8 +1081,8 @@ def borrow_book(BID: str, SID: str) -> bool:
         cursor.execute(cmdline)
         cursor.execute(f'''
         INSERT
-        INTO borrow
-        VALUES('{SID}', '{BID}', '{BORROW_DATE}', '{DEADLINE}')''')
+        INTO borrow (reader_ID,book_ID,borrow_Date)
+        VALUES('{SID}', '{BID}', '{BORROW_DATE}')''')
         cursor.execute(f'''
         DELETE
         FROM reserve

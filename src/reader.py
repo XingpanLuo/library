@@ -59,7 +59,12 @@ class readerPage(QWidget):
                              QMessageBox.NoButton, self)
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.exec_()
-
+        
+    def setHeadshot(self, headshotPath):
+        self.headshot = QPixmap(headshotPath).scaled(50, 50)
+        self.headshot_.setPixmap(self.headshot)
+        self.update()
+        
     # 设置标题栏
     def setTitleBar(self):
         self.title = QLabel()
@@ -80,10 +85,12 @@ class readerPage(QWidget):
         self.headshot_ = QLabel(self)
         self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
         self.headshot_.setPixmap(self.headshot)
+        self.headshot_.resize(200, 200)
 
         titleLayout = QHBoxLayout()
         titleLayout.addSpacing(100)
         titleLayout.addWidget(self.title)
+        titleLayout.addSpacing(700)
         titleLayout.addWidget(self.headshot_)
         titleLayout.addWidget(self.account)
         titleLayout.addWidget(self.out)
@@ -159,7 +166,7 @@ class readerPage(QWidget):
     def setContent(self):
         pages = [
             BookSearch(self.info['ID']),
-            ReaderBorrowHistory(self.info['ID']),
+            ReaderBorrowHistory(self.info['ID'],self),
             SelfInfo(self.info['ID'], self)
         ]
         if self.content is not None:
@@ -353,6 +360,7 @@ class BookSearch(QGroupBox):
         if book_info is None:
             return
         database.borrow_book(book_info['ID'], self.SID)
+        self.searchFunction()
 
     # 待完成
     def updateReserveFunction(self, BID: str):
@@ -377,9 +385,10 @@ class BookSearch(QGroupBox):
 
 class ReaderBorrowHistory(QWidget):
 
-    def __init__(self, UID: str):
+    def __init__(self, UID: str,parent):
         super().__init__()
         self.UID = UID
+        self.parent=parent
         self.body = QVBoxLayout()
         self.table = None
         self.showHistory()
@@ -425,13 +434,15 @@ class ReaderBorrowHistory(QWidget):
         itemNAME.setTextAlignment(Qt.AlignCenter)
         itemBorrowDate = QTableWidgetItem(val[2].strftime('%Y-%m-%d'))
         itemBorrowDate.setTextAlignment(Qt.AlignCenter)
+        lastTime=val[2]+datetime.timedelta(days=60)
         itemBorrowDate_msg = ""
         if val[3] is None:
-            itemBorrowDate_msg = "未归还"
-        elif val[3] < datetime.date.today():
-            itemBorrowDate_msg = val[3].strftime('%Y-%m-%d')
+            # itemBorrowDate_msg = "未归还"
+            itemBorrowDate_msg = "最晚" + lastTime.strftime('%Y-%m-%d')
         else:
-            itemBorrowDate_msg = "最晚" + val[3].strftime('%Y-%m-%d')
+            itemBorrowDate_msg = val[3].strftime('%Y-%m-%d')
+        # else:
+        #     itemBorrowDate_msg = "最晚" + val[2]+datetime.timedelta(days=60)
         itemReturnDate = QTableWidgetItem(itemBorrowDate_msg)
         itemReturnDate.setTextAlignment(Qt.AlignCenter)
         self.table.insertRow(1)
@@ -463,6 +474,7 @@ class ReaderBorrowHistory(QWidget):
     # 待完成
     def returnBook(self, BID: str):
         database.return_book(BID, self.UID)
+        self.parent.switch(1,self)
 
     def initUI(self):
         self.setFixedSize(900, 600)
@@ -596,7 +608,7 @@ class SelfInfo(QWidget):
     def chooseHeadFile(self):
         # 实现chooseHeadFile方法，用于选择头像文件
         filePath, fileType = QFileDialog.getOpenFileName(
-            self, '选择文件', './src', 'Image files(*.png *.jpg *.jpeg *.bmp)')
+            self, '选择文件', './headshot', 'Image files(*.png *.jpg *.jpeg *.bmp)')
         self.headInput.setText(filePath)
         self.stu_info['headshot'] = filePath
         self.headInput.setText(str(self.stu_info['headshot']))
@@ -620,6 +632,8 @@ class SelfInfo(QWidget):
             self.stu_info['PWD'] = database.encrypt(self.passwordInput.text())
         self.stu_info['NAME'] = self.nameInput.text()
         self.stu_info['EMAIL'] = self.emailInput.text()
+        self.parent.setHeadshot(self.stu_info['headshot'])
+        
         # self.stu_info['headshot'] = self.headInput.text()
 
         if database.update_reader(self.stu_info, submit_state) is True:

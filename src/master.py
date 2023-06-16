@@ -64,10 +64,17 @@ class AdministratorPage(QWidget):
         self.out = QToolButton()
         self.out.setText('退出')
         self.out.setFixedHeight(30)
+        
+        self.headshot_ = QLabel(self)
+        self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
+        self.headshot_.setPixmap(self.headshot)
+        self.headshot_.resize(200, 200)
 
         titleLayout = QHBoxLayout()
         titleLayout.addSpacing(100)
         titleLayout.addWidget(self.title)
+        titleLayout.addSpacing(700)
+        titleLayout.addWidget(self.headshot_)
         titleLayout.addWidget(self.account)
         titleLayout.addWidget(self.out)
         self.titleBar.setLayout(titleLayout)
@@ -148,7 +155,12 @@ class AdministratorPage(QWidget):
     def switch(self, index, btn):
         self.focus = index
         self.setContent()
-
+        
+    def setHeadshot(self, headshotPath):
+        self.headshot = QPixmap(headshotPath).scaled(50, 50)
+        self.headshot_.setPixmap(self.headshot)
+        self.update()
+        
     # 设置右侧信息页
     def setContent(self):
         if self.content is not None:
@@ -1145,7 +1157,7 @@ class SelfInfo(QWidget):
     #             return
     def chooseHeadFile(self):
         # 实现chooseHeadFile方法，用于选择头像文件
-        filePath, fileType = QFileDialog.getOpenFileName(self, '选择文件', '.', 'Image files(*.png *.jpg *.jpeg *.bmp)')
+        filePath, fileType = QFileDialog.getOpenFileName(self, '选择文件', './headshot', 'Image files(*.png *.jpg *.jpeg *.bmp)')
         self.headInput.setText(filePath)
         self.stu_info['headshot'] = filePath
         self.headInput.setText(str(self.stu_info['headshot']))      
@@ -1181,6 +1193,7 @@ class SelfInfo(QWidget):
                                  QMessageBox.NoButton, self)
             msgBox.addButton("确认", QMessageBox.AcceptRole)
             msgBox.exec_()
+        self.parent.setHeadshot(self.stu_info['headshot'])
         self.parent.switch(5, self)
 
     def initUI(self):
