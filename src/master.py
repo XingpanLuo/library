@@ -671,11 +671,12 @@ class BorrowManage(QWidget):
             itemBorrowTime = QTableWidgetItem(val[4].strftime('%Y-%m-%d'))
         except:
             itemBorrowTime = QTableWidgetItem('NULL')
+        lastTime=val[4]+datetime.timedelta(days=60)
         itemBorrowTime.setTextAlignment(Qt.AlignCenter)
         try:
             itemReturnTime = QTableWidgetItem(val[5].strftime('%Y-%m-%d'))
         except:
-            itemReturnTime = QTableWidgetItem('NULL')
+            itemReturnTime = QTableWidgetItem("最晚"+lastTime.strftime('%Y-%m-%d'))
         itemReturnTime.setTextAlignment(Qt.AlignCenter)
 
         itemLayout = QHBoxLayout()
