@@ -59,12 +59,12 @@ class readerPage(QWidget):
                              QMessageBox.NoButton, self)
         msgBox.addButton("确认", QMessageBox.AcceptRole)
         msgBox.exec_()
-        
+
     def setHeadshot(self, headshotPath):
         self.headshot = QPixmap(headshotPath).scaled(50, 50)
         self.headshot_.setPixmap(self.headshot)
         self.update()
-        
+
     # 设置标题栏
     def setTitleBar(self):
         self.title = QLabel()
@@ -166,7 +166,7 @@ class readerPage(QWidget):
     def setContent(self):
         pages = [
             BookSearch(self.info['ID']),
-            ReaderBorrowHistory(self.info['ID'],self),
+            ReaderBorrowHistory(self.info['ID'], self),
             SelfInfo(self.info['ID'], self)
         ]
         if self.content is not None:
@@ -201,6 +201,11 @@ class BookSearch(QGroupBox):
         # 检测是否有超期
         self.is_tle = False if len(
             database.get_violation_list(SID)) == 0 else True
+        # 检测是否超过借阅数目
+        self.is_cle = True if sum([
+            1 if data[-1] is None else 0
+            for data in database.get_borrow_list(SID)
+        ]) >= 3 else False
         self.setSearchBar()
         self.searchFunction()
 
@@ -279,9 +284,7 @@ class BookSearch(QGroupBox):
         is_rent_by_self = False
         for _borrowinfo in database.get_borrow_list(val[0], True):
             # 借阅记录是自己的而且没还
-            if _borrowinfo[0] == self.SID and (
-                    _borrowinfo[-1] is None
-                    or _borrowinfo[-1] > datetime.date.today()):
+            if _borrowinfo[0] == self.SID and (_borrowinfo[-1] is None):
                 is_rent_by_self = True
         # 检测是否是本人预约的
         is_reserve_by_self = False
@@ -320,10 +323,9 @@ class BookSearch(QGroupBox):
         itemBorrow_exist = False
         itemBorrow = QToolButton(self.table)
         itemBorrow.setFixedSize(75, 25)
-        # 可借阅逻辑：不可违期，且书在馆无预约或有预约且预约者为本人
-        if (self.is_tle is False) and (val[4] == 0 or
-                                       (val[4] == 3
-                                        and is_reserve_by_self is True)):
+        # 书可借阅逻辑：不可违期，在借书籍不能超过3本，且书在馆无预约或有预约且预约者为本人
+        if (self.is_tle is False) and (self.is_cle is False) and (
+                val[4] == 0 or (val[4] == 3 and is_reserve_by_self is True)):
             itemBorrow_exist = True
             itemBorrow.setText('借阅')
             itemBorrow.clicked.connect(
@@ -385,10 +387,10 @@ class BookSearch(QGroupBox):
 
 class ReaderBorrowHistory(QWidget):
 
-    def __init__(self, UID: str,parent):
+    def __init__(self, UID: str, parent):
         super().__init__()
         self.UID = UID
-        self.parent=parent
+        self.parent = parent
         self.body = QVBoxLayout()
         self.table = None
         self.showHistory()
@@ -434,7 +436,7 @@ class ReaderBorrowHistory(QWidget):
         itemNAME.setTextAlignment(Qt.AlignCenter)
         itemBorrowDate = QTableWidgetItem(val[2].strftime('%Y-%m-%d'))
         itemBorrowDate.setTextAlignment(Qt.AlignCenter)
-        lastTime=val[2]+datetime.timedelta(days=60)
+        lastTime = val[2] + datetime.timedelta(days=60)
         itemBorrowDate_msg = ""
         if val[3] is None:
             # itemBorrowDate_msg = "未归还"
@@ -474,7 +476,7 @@ class ReaderBorrowHistory(QWidget):
     # 待完成
     def returnBook(self, BID: str):
         database.return_book(BID, self.UID)
-        self.parent.switch(1,self)
+        self.parent.switch(1, self)
 
     def initUI(self):
         self.setFixedSize(900, 600)
@@ -608,7 +610,8 @@ class SelfInfo(QWidget):
     def chooseHeadFile(self):
         # 实现chooseHeadFile方法，用于选择头像文件
         filePath, fileType = QFileDialog.getOpenFileName(
-            self, '选择文件', './headshot', 'Image files(*.png *.jpg *.jpeg *.bmp)')
+            self, '选择文件', './headshot',
+            'Image files(*.png *.jpg *.jpeg *.bmp)')
         self.headInput.setText(filePath)
         self.stu_info['headshot'] = filePath
         self.headInput.setText(str(self.stu_info['headshot']))
@@ -633,7 +636,7 @@ class SelfInfo(QWidget):
         self.stu_info['NAME'] = self.nameInput.text()
         self.stu_info['EMAIL'] = self.emailInput.text()
         self.parent.setHeadshot(self.stu_info['headshot'])
-        
+
         # self.stu_info['headshot'] = self.headInput.text()
 
         if database.update_reader(self.stu_info, submit_state) is True:
