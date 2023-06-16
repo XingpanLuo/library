@@ -25,7 +25,8 @@ class AdministratorPage(QWidget):
 
     def __init__(self, info):
         super().__init__()
-        self.info = info
+        print(info)
+        self.info = database.get_master_info(info['ID'])
         self.focus = 0
         self.initUI()
 
@@ -66,6 +67,7 @@ class AdministratorPage(QWidget):
         self.out.setFixedHeight(30)
         
         self.headshot_ = QLabel(self)
+        print(self.info)
         self.headshot = QPixmap(self.info['headshot']).scaled(50, 50)
         self.headshot_.setPixmap(self.headshot)
         self.headshot_.resize(200, 200)

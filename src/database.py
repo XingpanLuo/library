@@ -149,6 +149,7 @@ def init_database():
         db.create_reserve_view(cursor)
         db.create_violation_view(cursor)
         db.create_trigger(cursor)
+        db.create_check_function(cursor)
         conn.commit()
     except Exception as e:
         # print('Init fall 如果数据库已经成功初始化则无视此条警告')
@@ -246,12 +247,12 @@ def signin(user_message: dict) -> dict:
             # print(reader_ID, book_ID,borrow_Date,return_Date)
             if datetime.now().date() - borrow_Date > timedelta(days=60) and return_Date is None:
                 # 检查是否已经存在记录
-                cursor.execute("SELECT * FROM violation WHERE reader_ID = %s AND book_ID = %s", (reader_ID, book_ID))
-                record = cursor.fetchone()
-            if record is None:
-                # 如果不存在记录，执行插入操作
-                cursor.execute("INSERT INTO violation (reader_ID,book_ID,borrow_Date) VALUES (%s,%s,%s)", (reader_ID,book_ID,borrow_Date.strftime('%Y-%m-%d')))
-       
+                cursor.execute("SELECT check_violation_exists(%s, %s)", (reader_ID, book_ID))
+                count = cursor.fetchone()[0]
+                if count == 0:
+                    # 如果不存在记录，执行插入操作
+                    cursor.execute("INSERT INTO violation (reader_ID,book_ID,borrow_Date) VALUES (%s,%s,%s)", (reader_ID,book_ID,borrow_Date.strftime('%Y-%m-%d')))
+                
         cursor.execute(
             '''
         SELECT ID
@@ -1004,10 +1005,7 @@ def delete_book(ID: str):
 
 # 搜索书籍
 def search_book(info: str, restrict: str, SID: str = '') -> list:
-    '''
-    传入搜索信息，并指明BID或AUTHOR或PRESS或BNAME或CLASSIFYICATION进行查找，如果传入SID则匹配这个学生的借书状态
-    返回[[BID, BNAME, AUTHOR, PUBLICATION_DATE, PRESS, POSITION, SUM, NUM, CLASSIFICATION, STATE],...]
-    '''
+    print(info,restrict,SID)
     try:
         res = []
         conn = pymysql.connect(host=CONFIG['host'],
@@ -1024,9 +1022,10 @@ def search_book(info: str, restrict: str, SID: str = '') -> list:
             FROM book;
             ''')
             res = tuple_to_list(cursor.fetchall())
-        elif restrict == 'name' or restrict == 'author':
-            # AUTHOR或PRESS或BNAME
+        elif restrict == 'NAME' or restrict == 'AUTHOR':
+            print(restrict)
             info = '\"%' + info + '%\"'
+            print(info)
             cursor.execute(f'''
             SELECT *
             FROM book

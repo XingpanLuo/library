@@ -28,7 +28,7 @@ def create_procedure_add_book(cursor):
         SET status = FLOOR(RAND() * (3));
         
         INSERT INTO book(ID,NAME,AUTHOR,PRICE,BORROW_TIMES,RESERVE_TIMES,STATUS)
-        VALUES(book_id, book_name, book_author, book_price, borrow_times, reserve_times, status);
+        VALUES(book_id, book_name, book_author, book_price, 0, 0, 0);
         
     END;
     '''
@@ -59,7 +59,10 @@ def create_procedure_delete_book(cursor):
             SET result_str="借出书籍不可删除";
         ELSEIF st=2 THEN
             SET result=FALSE;
-            SET result_str="预约中书籍不可删除";
+            SET result_str="借出书籍不可删除";
+        ELSEIF st=3 THEN
+            SET result=FALSE;
+            SET result_str="预约中的书籍不可删除";
         END IF;
         
     END;
@@ -99,7 +102,19 @@ def create_violation_view(cursor):
     '''
     cursor.execute(sql)
 
-
+def create_check_function(cursor):
+    sql='''
+    CREATE FUNCTION check_violation_exists(reader char(8), book char(8)) RETURNS INT
+    DETERMINISTIC
+    READS SQL DATA
+    BEGIN
+        DECLARE result INT;
+        SELECT COUNT(*) INTO result FROM violation WHERE reader_ID = reader AND book_ID = book;
+        RETURN result;
+    END;
+    '''
+    cursor.execute(sql)
+    
 def db_init_table(cursor):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS reader(
