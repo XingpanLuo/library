@@ -244,7 +244,7 @@ class BookSearch(QGroupBox):
 
     # 搜索方法
     def searchFunction(self):
-        convert = {'书号': 'ID', '作者': 'author', '书名': 'name', '': 'name'}
+        convert = {'书号': 'ID', '作者': 'AUTHOR', '书名': 'NAME', '': 'NAME'}
         self.book_list = database.search_book(
             self.searchInput.text(), convert[self.selectBox.currentText()])
         if self.book_list == []:
